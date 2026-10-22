@@ -50,6 +50,17 @@ The next due date is a fixed interval after the day the task was completed.
 - Completed on Monday → the next one is due Thursday.
 - Completed late, on Saturday → the next one is due Tuesday, 3 days after it was actually done.
 
+### Intervals work in both modes
+
+"Every 3 days" can be either kind. Apple Reminders' "every 3 days" is schedule-based: it counts from the previous due date. For a task due Monday that repeats every 3 days:
+
+| | Schedule-based | Completion-based |
+|---|---|---|
+| Due dates when done on time | Mon, Thu, Sun, Wed… | Mon, Thu, Sun, Wed… |
+| Thursday's one done late, on Saturday | Next is due Sunday (Thursday + 3) | Next is due Tuesday (Saturday + 3) |
+
+The two modes only differ when a task is done late.
+
 ## Open questions
 
 - **Very late completion of a schedule-based task.** If a weekly task is completed three weeks late, is the next one due on the next upcoming scheduled date, so missed weeks are skipped, or on the scheduled date after the one just completed, even if that is already in the past?
