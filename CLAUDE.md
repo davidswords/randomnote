@@ -9,6 +9,14 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
 - **Clean code:** small, well-named functions. Keep domain logic in `packages/core` as pure TypeScript, free of UI and platform code.
 - **Ask, don't guess:** when a product decision is open in `docs/decisions.md`, ask instead of assuming.
 
+## Testing
+
+- **Unit tests** (`*.test.ts`) cover one behaviour with no real I/O, clock, randomness, crypto, storage or network. Dependencies are passed in as simple fakes. This is where red, green, refactor happens.
+- **Integration tests** (`*.integration.test.ts`) run our code against the real dependency at a boundary: Web Crypto, storage, encryption, Tauri, the sync server.
+- **Contract tests:** each port (for example a repository interface) has one shared suite. The in-memory version runs it as a unit test, and every real adapter runs the same suite as an integration test.
+- **Conventions:** arrange, act, assert; one behaviour per test; test names describe behaviour; no logic in assertions; test through the public API; prefer fakes over mocking libraries.
+- **Mutation check:** when a test passes as soon as it's written, break the code on purpose and confirm the test fails.
+
 ## Layout
 
 - `packages/core`: domain logic and its tests.
@@ -20,6 +28,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 
 - `npm ci`: install dependencies.
 - `npm test`: run all tests.
+- `npm run test:unit` / `npm run test:integration`: run one kind on its own.
 - `npm run typecheck`: typecheck all workspaces.
 - `npm run dev`: run the desktop app. This needs Rust and the Tauri prerequisites for your OS.
 
