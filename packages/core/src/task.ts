@@ -3,5 +3,5 @@ export type Task = {
 };
 
 export function createTask(title: string): Task {
-  return { title };
+  return { title: title.trim() };
 }

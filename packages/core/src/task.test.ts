@@ -13,4 +13,10 @@ describe("createTask", () => {
 
     expect(task.title).toBe("Call the dentist");
   });
+
+  it("trims whitespace around the title", () => {
+    const task = createTask("  Buy milk \n");
+
+    expect(task.title).toBe("Buy milk");
+  });
 });
