@@ -4,7 +4,9 @@
 use randomnote_lib::{TaskState, with_task_commands};
 use randomnote_store::TaskStore;
 use serde_json::{Value, json};
-use tauri::test::{INVOKE_KEY, MockRuntime, get_ipc_response, mock_builder, mock_context, noop_assets};
+use tauri::test::{
+    INVOKE_KEY, MockRuntime, get_ipc_response, mock_builder, mock_context, noop_assets,
+};
 use tauri::webview::InvokeRequest;
 use tauri::{App, Manager, WebviewWindow, WebviewWindowBuilder};
 
@@ -43,7 +45,10 @@ impl TestApp {
 fn find_task_returns_null_for_an_id_that_was_never_saved() {
     let app = TestApp::with_empty_store();
 
-    assert_eq!(app.invoke("find_task", json!({ "id": "missing" })), Ok(Value::Null));
+    assert_eq!(
+        app.invoke("find_task", json!({ "id": "missing" })),
+        Ok(Value::Null)
+    );
 }
 
 #[test]
@@ -51,7 +56,10 @@ fn find_task_returns_a_task_saved_with_save_task() {
     let app = TestApp::with_empty_store();
     let task = json!({ "id": "task-1", "title": "Buy milk" });
 
-    assert_eq!(app.invoke("save_task", json!({ "task": task })), Ok(Value::Null));
+    assert_eq!(
+        app.invoke("save_task", json!({ "task": task })),
+        Ok(Value::Null)
+    );
 
     assert_eq!(app.invoke("find_task", json!({ "id": "task-1" })), Ok(task));
 }
