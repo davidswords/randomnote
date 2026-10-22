@@ -15,7 +15,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+randomnote-store = { version = "0.1.0", path = "../../../crates/store" }
 tauri = { version = "2", features = [] }
+
+[dev-dependencies]
+serde_json = "1"
+tauri = { version = "2", features = ["test"] }
+tempfile = "3"
 
 [profile.release]
 codegen-units = 1

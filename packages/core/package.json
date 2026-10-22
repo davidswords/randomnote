@@ -2,7 +2,10 @@
   "name": "@randomnote/core",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.ts"
+  },
   "scripts": {
     "test": "vitest run",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",

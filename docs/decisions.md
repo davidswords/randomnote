@@ -60,4 +60,5 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - Encryption: the algorithm, key derivation, what is encrypted, and what happens if the password is lost.
 - Sync: where the encrypted data is stored, and how conflicting changes to the same record from two devices are merged.
 - Accounts: username and password, two-factor authentication, and recovery keys.
+- Web version: possibly later, with a browser storage adapter (SQLite compiled to WebAssembly, or IndexedDB) behind the same `TaskRepository`. Encryption code would then need to run in the browser too.
 - Business model and licence: whether randomnote stays open source with paid sync, and whether the repository stays public.
