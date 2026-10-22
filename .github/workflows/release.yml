@@ -49,7 +49,7 @@ jobs:
         run: |
           dmg="$(ls apps/desktop/src-tauri/target/release/bundle/dmg/*_aarch64.dmg)"
           echo "Built $dmg"
-          lipo -archs apps/desktop/src-tauri/target/release/bundle/macos/randomnote.app/Contents/MacOS/randomnote | grep -qx arm64
+          lipo -archs apps/desktop/src-tauri/target/release/randomnote | grep -qx arm64
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
