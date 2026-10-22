@@ -1,6 +1,6 @@
 //! SQLite storage for randomnote.
 
-use rusqlite::{Connection, OptionalExtension, params};
+use rusqlite::{Connection, OptionalExtension, Row, params};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Task {
@@ -41,13 +41,22 @@ impl TaskStore {
             .query_row(
                 "SELECT id, title FROM tasks WHERE id = ?1",
                 params![id],
-                |row| {
-                    Ok(Task {
-                        id: row.get(0)?,
-                        title: row.get(1)?,
-                    })
-                },
+                task_from_row,
             )
             .optional()
     }
+
+    pub fn list(&self) -> rusqlite::Result<Vec<Task>> {
+        self.connection
+            .prepare("SELECT id, title FROM tasks")?
+            .query_map([], task_from_row)?
+            .collect()
+    }
+}
+
+fn task_from_row(row: &Row) -> rusqlite::Result<Task> {
+    Ok(Task {
+        id: row.get(0)?,
+        title: row.get(1)?,
+    })
 }
