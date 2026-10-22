@@ -16,7 +16,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **A title cannot be empty** or whitespace-only. Creating such a task fails with `InvalidTaskTitleError`.
 - **Titles have no length limit** for now, and accept any Unicode text.
 - **Renaming changes the task in place.** It stays the same task, with the same ID and record.
-- **Recurring tasks are a series plus occurrences,** and behave like Apple Reminders, plus repeating a fixed time after completion. See [design/recurring-tasks.md](design/recurring-tasks.md).
+- **Recurring tasks are a series plus occurrences,** and behave exactly like Apple Reminders. See [design/recurring-tasks.md](design/recurring-tasks.md).
 
 ## Organising tasks
 

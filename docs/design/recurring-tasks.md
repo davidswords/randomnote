@@ -4,7 +4,7 @@ How randomnote models tasks that repeat. Decided points are marked **Decided**. 
 
 ## Guiding principle (Decided)
 
-Recurring tasks behave like **Apple Reminders**, plus completion-based repeats, which Reminders doesn't offer. When a detail isn't decided here, match Reminders. Reminders' behaviour is confirmed on a Mac before it becomes a test case.
+Recurring tasks behave **exactly like Apple Reminders**. Where this note and Reminders disagree, Reminders wins. Reminders' behaviour is confirmed on a Mac before it becomes a test case.
 
 ## Model: series plus occurrences (Decided)
 
@@ -32,40 +32,22 @@ So an occurrence's ID is **calculated** from its series ID and its due date, not
 
 Everywhere else, an ID is an opaque string.
 
-## Two ways to repeat (Decided)
+## Repeats follow the calendar (Decided)
 
-A series' rule says which date the next occurrence counts from.
-
-### Schedule-based: follows the calendar
-
-The next due date comes from the rule and the previous due date, whenever the task was actually done.
+Like Reminders, a series repeats on a schedule. The next due date comes from the rule and the previous due date, not from when the task was actually done.
 
 *Example: "Put the bins out, every Monday."*
 
 - Completed on Monday → the next one is due next Monday.
 - Completed late, on Wednesday → the next one is still due next Monday. Bin day doesn't move.
-- Completed three weeks late → the next one is due next Monday. **Missed occurrences are skipped (Decided):** the next due date is the first scheduled date after the day the task is completed, so a late task never creates a backlog of overdue copies.
-- Completed early, on the Saturday before → the next one is due the Monday after. The next due date is the first scheduled date after **whichever is later: the completion day or the completed occurrence's due date**. Counting from the completion day alone would make the same Monday come back.
+- Completed three weeks late → the next one is due next Monday. Missed occurrences are skipped, so a late task never creates a backlog of overdue copies.
+- Completed early, on the Saturday before → the next one is due the Monday after.
 
-### Completion-based: counts from when it was done
+So the next due date is the first scheduled date after whichever is later: the day the task was completed, or the completed occurrence's due date. The late and early cases are expected to match Reminders, and are confirmed on a Mac before becoming tests.
 
-The next due date is a fixed interval after the day the task was completed.
+Intervals work the same way. A task due Monday that repeats every 3 days is due Monday, Thursday, Sunday and so on. If Thursday's one is done late, on Saturday, the next one is still due Sunday.
 
-*Example: "Water the plants, 3 days after I last did it."*
-
-- Completed on Monday → the next one is due Thursday.
-- Completed late, on Saturday → the next one is due Tuesday, 3 days after it was actually done.
-
-### Intervals work in both modes
-
-"Every 3 days" can be either kind. Apple Reminders' "every 3 days" is schedule-based: it counts from the previous due date. For a task due Monday that repeats every 3 days:
-
-| | Schedule-based | Completion-based |
-|---|---|---|
-| Due dates when done on time | Mon, Thu, Sun, Wed… | Mon, Thu, Sun, Wed… |
-| Thursday's one done late, on Saturday | Next is due Sunday (Thursday + 3) | Next is due Tuesday (Saturday + 3) |
-
-The two modes only differ when a task is done late.
+**Not supported:** repeating a fixed time after completion ("3 days after I last did it"), because Reminders doesn't offer it.
 
 ## Following Reminders (to confirm on a Mac)
 
