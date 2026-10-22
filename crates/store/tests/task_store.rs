@@ -11,6 +11,21 @@ fn a_task(id: &str, title: &str) -> Task {
 }
 
 #[test]
+fn keeps_tasks_after_the_database_file_is_closed_and_reopened() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("randomnote.db");
+    let task = a_task("task-1", "Buy milk");
+
+    {
+        let store = TaskStore::open(&path).unwrap();
+        store.save(&task).unwrap();
+    }
+    let reopened = TaskStore::open(&path).unwrap();
+
+    assert_eq!(reopened.list().unwrap(), vec![task]);
+}
+
+#[test]
 fn finds_a_saved_task_by_its_id() {
     let store = TaskStore::open_in_memory().unwrap();
     let task = a_task("task-1", "Buy milk");
@@ -72,5 +87,8 @@ fn updates_a_task_in_place_when_it_is_saved_again_with_the_same_id() {
         store.find_by_id("task-1").unwrap(),
         Some(a_task("task-1", "Buy oat milk"))
     );
-    assert_eq!(store.list().unwrap(), vec![a_task("task-1", "Buy oat milk")]);
+    assert_eq!(
+        store.list().unwrap(),
+        vec![a_task("task-1", "Buy oat milk")]
+    );
 }

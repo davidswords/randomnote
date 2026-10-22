@@ -1,5 +1,7 @@
 //! SQLite storage for randomnote.
 
+use std::path::Path;
+
 use rusqlite::{Connection, OptionalExtension, Row, params};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -13,6 +15,11 @@ pub struct TaskStore {
 }
 
 impl TaskStore {
+    /// Opens the database file at `path`, creating it if needed.
+    pub fn open(path: &Path) -> rusqlite::Result<Self> {
+        Self::with_schema(Connection::open(path)?)
+    }
+
     /// Opens a database that lives only in memory, for tests.
     pub fn open_in_memory() -> rusqlite::Result<Self> {
         Self::with_schema(Connection::open_in_memory()?)
