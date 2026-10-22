@@ -1,0 +1,25 @@
+[package]
+name = "randomnote"
+version = "0.1.0"
+description = "A simple, client-side encrypted todo app"
+authors = ["David Swords"]
+license = "GPL-3.0-only"
+edition = "2024"
+
+[lib]
+# The `_lib` suffix keeps the lib name distinct from the bin name (cargo#8519).
+name = "randomnote_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

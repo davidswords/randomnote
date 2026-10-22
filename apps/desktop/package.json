@@ -1,0 +1,20 @@
+{
+  "name": "@randomnote/desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p .",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@randomnote/core": "*"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}
