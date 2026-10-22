@@ -30,4 +30,22 @@ describe("createTask", () => {
       expect(() => createTask(title)).toThrow(InvalidTaskTitleError);
     },
   );
+
+  it("keeps whitespace inside the title as typed", () => {
+    const task = createTask("Buy  milk\tand\neggs");
+
+    expect(task.title).toBe("Buy  milk\tand\neggs");
+  });
+
+  it("accepts a very long title", () => {
+    const title = "a".repeat(100_000);
+
+    expect(createTask(title).title).toBe(title);
+  });
+
+  it("accepts any Unicode text", () => {
+    const task = createTask("Café ☕ 日本語 🛒");
+
+    expect(task.title).toBe("Café ☕ 日本語 🛒");
+  });
 });
