@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createTask } from "./task";
+import { createTask, InvalidTaskTitleError } from "./task";
 
 describe("createTask", () => {
   it("creates a task with the given title", () => {
@@ -18,5 +18,9 @@ describe("createTask", () => {
     const task = createTask("  Buy milk \n");
 
     expect(task.title).toBe("Buy milk");
+  });
+
+  it("rejects an empty title", () => {
+    expect(() => createTask("")).toThrow(InvalidTaskTitleError);
   });
 });
