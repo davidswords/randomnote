@@ -9,6 +9,7 @@
     "test": "vitest run",
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
     "test:integration": "vitest run --passWithNoTests .integration.test",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "typecheck": "tsc -p .",
     "tauri": "tauri"
   },
