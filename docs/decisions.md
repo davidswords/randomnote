@@ -18,6 +18,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Tags can be archived,** so finished projects stop cluttering the sidebar. Apple Reminders can't do this, and old lists pile up.
 - **No built-in Inbox, Projects or Areas sections.** Everything is a tag.
 - **A default `#inbox` tag.** It is created by default and pinned at the top, but it is an ordinary tag, not a special section.
+- **Every task has at least one tag.** A new task is tagged `#inbox` automatically.
 - **Any tag can be pinned** to the top.
 - **Smart lists** are saved queries over several tags, and they can be pinned too.
 
@@ -36,7 +37,9 @@ Product and technical decisions for randomnote. Add to this file when a decision
 ## Open questions
 
 - Does viewing a parent tag also show tasks from its child tags?
-- Can a task have no tags, or does an untagged task go to `#inbox`? Does a task leave `#inbox` when it gets another tag?
+- Does a task leave `#inbox` automatically when it gets another tag?
+- What happens when the last tag is removed from a task: is that refused, or does the task go back to `#inbox`?
+- Is a task created while viewing another tag (for example `Work`) tagged `#inbox`, or with that tag?
 - Does archiving a tag archive its child tags? How does a task show if it has both archived and active tags?
 - What happens to a tag's tasks when the tag is deleted?
 - Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
