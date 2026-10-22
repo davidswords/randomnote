@@ -27,3 +27,9 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 
 - `.github/workflows/ci.yml` runs typecheck and tests on pull requests and on pushes to `main`.
 - `.github/workflows/release.yml` builds the Apple Silicon `.dmg`. On a `v*` tag it publishes a GitHub release. The tag must match the version in `apps/desktop/package.json`.
+
+## Releasing
+
+1. Bump the version in `apps/desktop/package.json` (`npm version X.Y.Z -w @randomnote/desktop --no-git-tag-version`, with npm 11 so the lockfile format matches) and in `apps/desktop/src-tauri/Cargo.toml` (then `cargo update --workspace` in `src-tauri`). Merge it through a pull request.
+2. Tag the merge commit on `main` as `vX.Y.Z` and push the tag. The release workflow builds and publishes the `.dmg`.
+3. The `Update casks` workflow in [davidswords/homebrew-tap](https://github.com/davidswords/homebrew-tap) updates the cask daily at 06:17 UTC. Run it by hand to publish sooner.

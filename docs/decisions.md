@@ -10,6 +10,12 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Client-side encrypted.** Data is encrypted on the device.
 - **Highly performant.**
 
+## Tasks
+
+- **A task has a title.** Surrounding whitespace is trimmed; whitespace inside the title is kept as typed.
+- **A title cannot be empty** or whitespace-only. Creating such a task fails with `InvalidTaskTitleError`.
+- **Titles have no length limit** for now, and accept any Unicode text.
+
 ## Organising tasks
 
 - **Hierarchical tags.** Tags form a tree, and a task can have several tags.
@@ -46,4 +52,6 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - What happens to a tag's tasks when the tag is deleted?
 - Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
 - Encryption: the algorithm, key derivation, what is encrypted, and what happens if the password is lost.
-- Sync between devices: whether to have it, and how.
+- Sync: where the encrypted data is stored, and how conflicting changes from two devices are merged.
+- Accounts: username and password, two-factor authentication, and recovery keys.
+- Business model and licence: whether randomnote stays open source with paid sync, and whether the repository stays public.
