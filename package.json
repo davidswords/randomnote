@@ -17,6 +17,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "allowScripts": {
-    "fsevents": false
+    "fsevents": false,
+    "edgedriver": false,
+    "geckodriver": false
   }
 }
