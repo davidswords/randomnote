@@ -47,6 +47,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **IDs are UUID v7,** generated on the device. They sort by creation time. Occurrences of recurring tasks are the exception (see the design note).
 - **Storage and sync encrypt each record separately,** as Standard Notes and Notesnook do. Sync sends only changed records, conflicts are resolved per record, and the server only sees ciphertext.
 - **Storage sits behind interfaces in `core`,** with an in-memory version for unit tests and real adapters in the apps.
+- **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.
 
 ## Open questions
 

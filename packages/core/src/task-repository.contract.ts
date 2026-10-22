@@ -22,6 +22,16 @@ export function taskRepositoryContract(
       expect(await repository.findById("task-1")).toEqual(task);
     });
 
+    it("finds the task with the given ID among several", async () => {
+      const repository = await makeRepository();
+      await repository.save(aTask("task-1", "Buy milk"));
+      await repository.save(aTask("task-2", "Call the dentist"));
+
+      expect(await repository.findById("task-2")).toEqual(
+        aTask("task-2", "Call the dentist"),
+      );
+    });
+
     it("finds nothing for an ID that was never saved", async () => {
       const repository = await makeRepository();
 
