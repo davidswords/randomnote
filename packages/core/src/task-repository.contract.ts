@@ -27,5 +27,24 @@ export function taskRepositoryContract(
 
       expect(await repository.findById("missing")).toBeUndefined();
     });
+
+    it("lists nothing when no task was saved", async () => {
+      const repository = await makeRepository();
+
+      expect(await repository.list()).toEqual([]);
+    });
+
+    it("lists every saved task", async () => {
+      const repository = await makeRepository();
+      const milk = aTask("task-1", "Buy milk");
+      const dentist = aTask("task-2", "Call the dentist");
+
+      await repository.save(milk);
+      await repository.save(dentist);
+
+      const tasks = await repository.list();
+      expect(tasks).toHaveLength(2);
+      expect(tasks).toEqual(expect.arrayContaining([milk, dentist]));
+    });
   });
 }

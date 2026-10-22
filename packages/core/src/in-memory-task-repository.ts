@@ -11,4 +11,8 @@ export class InMemoryTaskRepository implements TaskRepository {
   async findById(id: string): Promise<Task | undefined> {
     return this.tasks.get(id);
   }
+
+  async list(): Promise<Task[]> {
+    return [...this.tasks.values()];
+  }
 }
