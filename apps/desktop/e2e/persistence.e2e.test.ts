@@ -7,8 +7,8 @@ beforeAll(async () => {
   driver = await AppDriver.start();
 });
 
-afterAll(() => {
-  driver.stop();
+afterAll(async () => {
+  await driver.stop();
 });
 
 async function addTask(app: RunningApp, title: string): Promise<void> {
@@ -26,12 +26,11 @@ describe("persistence", () => {
     const firstRun = await driver.launch();
     await addTask(firstRun, "Buy milk");
     await firstRun.waitUntil(async () => (await shownTitles(firstRun)).length === 1);
-    await firstRun.deleteSession();
+    await driver.quit(firstRun);
 
     const secondRun = await driver.launch();
     await secondRun.$('[aria-label="Tasks"]').waitForExist();
 
     expect(await shownTitles(secondRun)).toEqual(["Buy milk"]);
-    await secondRun.deleteSession();
   });
 });

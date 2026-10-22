@@ -18,6 +18,8 @@ export type RunningApp = Awaited<ReturnType<typeof remote>>;
  * data directory, so tests start empty and never touch real data.
  */
 export class AppDriver {
+  private readonly launched: RunningApp[] = [];
+
   private constructor(
     private readonly driver: ChildProcess,
     private readonly dataDirectory: string,
@@ -28,22 +30,33 @@ export class AppDriver {
     const driver = spawn("tauri-driver", ["--port", String(DRIVER_PORT)], {
       env: { ...process.env, XDG_DATA_HOME: dataDirectory },
       stdio: "inherit",
+      detached: true,
     });
     await waitForPort(DRIVER_PORT);
     return new AppDriver(driver, dataDirectory);
   }
 
-  launch(): Promise<RunningApp> {
-    return remote({
+  async launch(): Promise<RunningApp> {
+    const app = await remote({
       hostname: "127.0.0.1",
       port: DRIVER_PORT,
       logLevel: "warn",
       capabilities: { "tauri:options": { application: APPLICATION } } as never,
     });
+    this.launched.push(app);
+    return app;
   }
 
-  stop(): void {
-    this.driver.kill();
+  /** Quits an app, like closing it. */
+  async quit(app: RunningApp): Promise<void> {
+    this.launched.splice(this.launched.indexOf(app), 1);
+    await app.deleteSession();
+  }
+
+  /** Quits any app still running, even after a failed test, then stops the driver. */
+  async stop(): Promise<void> {
+    await Promise.allSettled(this.launched.map((app) => app.deleteSession()));
+    process.kill(-this.driver.pid!, "SIGTERM");
     rmSync(this.dataDirectory, { recursive: true, force: true });
   }
 }
