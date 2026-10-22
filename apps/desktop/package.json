@@ -13,12 +13,15 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@randomnote/core": "*"
+    "@randomnote/core": "*",
+    "@tauri-apps/api": "^2.12.4"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.12.4",
+    "happy-dom": "^21.0.4",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "webdriverio": "^10.1.0"
   }
 }
