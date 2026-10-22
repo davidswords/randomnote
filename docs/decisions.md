@@ -44,6 +44,9 @@ Product and technical decisions for randomnote. Add to this file when a decision
   - `packages/core` holds the domain logic, as pure TypeScript with no UI or platform code.
   - `apps/desktop` holds the Tauri shell and frontend.
 - **Vitest** for tests.
+- **IDs are UUID v7,** generated on the device. They sort by creation time. Occurrences of recurring tasks are the exception (see the design note).
+- **Storage and sync encrypt each record separately,** as Standard Notes and Notesnook do. Sync sends only changed records, conflicts are resolved per record, and the server only sees ciphertext.
+- **Storage sits behind interfaces in `core`,** with an in-memory version for unit tests and real adapters in the apps.
 
 ## Open questions
 
@@ -54,6 +57,6 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - What happens to a tag's tasks when the tag is deleted?
 - Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
 - Encryption: the algorithm, key derivation, what is encrypted, and what happens if the password is lost.
-- Sync: where the encrypted data is stored, and how conflicting changes from two devices are merged.
+- Sync: where the encrypted data is stored, and how conflicting changes to the same record from two devices are merged.
 - Accounts: username and password, two-factor authentication, and recovery keys.
 - Business model and licence: whether randomnote stays open source with paid sync, and whether the repository stays public.
