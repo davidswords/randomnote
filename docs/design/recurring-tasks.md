@@ -40,6 +40,7 @@ The next due date comes from the rule and the previous due date, whenever the ta
 
 - Completed on Monday → the next one is due next Monday.
 - Completed late, on Wednesday → the next one is still due next Monday. Bin day doesn't move.
+- Completed three weeks late → the next one is due next Monday. **Missed occurrences are skipped (Decided):** the next due date is the first scheduled date after the day the task is completed, so a late task never creates a backlog of overdue copies.
 
 ### Completion-based: counts from when it was done
 
@@ -63,7 +64,6 @@ The two modes only differ when a task is done late.
 
 ## Open questions
 
-- **Very late completion of a schedule-based task.** If a weekly task is completed three weeks late, is the next one due on the next upcoming scheduled date, so missed weeks are skipped, or on the scheduled date after the one just completed, even if that is already in the past?
 - **Editing.** Does changing a recurring task apply to this occurrence only, or to this and all future occurrences?
 - **Due dates on ordinary tasks.** Recurrence needs due dates. Can one-off tasks have due dates too?
 - **Which rules are supported.** For example every N days, weeks, months or years; particular weekdays; the last day of the month.
