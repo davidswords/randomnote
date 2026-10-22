@@ -2,6 +2,10 @@
 
 How randomnote models tasks that repeat. Decided points are marked **Decided**. Everything else is open and listed at the end.
 
+## Guiding principle (Decided)
+
+Recurring tasks behave like **Apple Reminders**, plus completion-based repeats, which Reminders doesn't offer. When a detail isn't decided here, match Reminders. Reminders' behaviour is confirmed on a Mac before it becomes a test case.
+
 ## Model: series plus occurrences (Decided)
 
 A recurring task is made of two kinds of record:
@@ -63,10 +67,15 @@ The next due date is a fixed interval after the day the task was completed.
 
 The two modes only differ when a task is done late.
 
+## Following Reminders (to confirm on a Mac)
+
+These defaults come from how Reminders is understood to work. Each needs confirming before it becomes a test.
+
+- **Rules:** daily, weekly, every 2 weeks, monthly, every 3 months, every 6 months, yearly. Custom: every N days; every N weeks on chosen weekdays; every N months on chosen days of the month or on "the first Monday"-style days; every N years.
+- **Ending a series:** never, or on an end date.
+- **Editing:** changing the open occurrence changes the series, so it applies to it and all future occurrences. Completed occurrences keep what they had.
+- **Due dates:** any task can have a due date, with or without a time, whether it repeats or not.
+
 ## Open questions
 
-- **Editing.** Does changing a recurring task apply to this occurrence only, or to this and all future occurrences?
-- **Due dates on ordinary tasks.** Recurrence needs due dates. Can one-off tasks have due dates too?
-- **Which rules are supported.** For example every N days, weeks, months or years; particular weekdays; the last day of the month.
-- **Ending a series.** After a number of occurrences, on a date, or only by deleting it?
 - **Time zones.** Whether "due Monday" is a calendar date or a moment in time, and what happens when travelling.
