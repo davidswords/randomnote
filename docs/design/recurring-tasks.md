@@ -32,32 +32,54 @@ So an occurrence's ID is **calculated** from its series ID and its due date, not
 
 Everywhere else, an ID is an opaque string.
 
-## Repeats follow the calendar (Decided)
+## When an occurrence is completed (Decided)
 
-Like Reminders, a series repeats on a schedule. The next due date comes from the rule and the previous due date, not from when the task was actually done.
+Like Reminders, a series repeats on a schedule. **The next occurrence is the first time the rule produces that is later than both the completed occurrence's due time and the moment it was completed.**
 
-*Example: "Put the bins out, every Monday."*
+That one rule covers every case below. They come from how Reminders behaves, as shown in MacMost's "Using Repeating Reminders" video.
 
-- Completed on Monday → the next one is due next Monday.
-- Completed late, on Wednesday → the next one is still due next Monday. Bin day doesn't move.
-- Completed three weeks late → the next one is due next Monday. Missed occurrences are skipped, so a late task never creates a backlog of overdue copies.
-- Completed early, on the Saturday before → the next one is due the Monday after.
+| Series | Completed | Next occurrence |
+|---|---|---|
+| Daily at 10:00 | Overdue, at 10:30 the same day | Tomorrow at 10:00 |
+| Daily at 11:00 | Early, at 10:30 the same day | Tomorrow at 11:00 |
+| Daily at 10:00 | Several days overdue, later in the day | Tomorrow at 10:00. Missed days are skipped. |
+| Daily at 21:00 | Early, that afternoon | Tomorrow at 21:00 |
+| Hourly, on the hour | Overdue | The start of the next hour |
+| Every Monday | On Monday | Next Monday |
+| Every Monday | Late, on Wednesday | Next Monday |
+| Every Monday | Three weeks late | Next Monday. Missed weeks are skipped. |
+| Every Monday | Early, on the Saturday before | The Monday after |
+| Every 3 days, due Monday | On time | Thursday, then Sunday, Wednesday… |
+| Every 3 days, due Monday | Thursday's done late, on Saturday | Sunday |
 
-So the next due date is the first scheduled date after whichever is later: the day the task was completed, or the completed occurrence's due date. The late and early cases are expected to match Reminders, and are confirmed on a Mac before becoming tests.
+A late task never creates a backlog of overdue copies, and completing early never brings the same occurrence back.
 
-Intervals work the same way. A task due Monday that repeats every 3 days is due Monday, Thursday, Sunday and so on. If Thursday's one is done late, on Saturday, the next one is still due Sunday.
+**First occurrence.** If the chosen start date doesn't match the rule, the first occurrence is the first date on or after the start that does. For example, "first weekend day of the month" starting on a Wednesday 1 June gives Saturday 4 June.
 
-**Not supported:** repeating a fixed time after completion ("3 days after I last did it"), because Reminders doesn't offer it.
+**Not supported,** because Reminders doesn't offer it: repeating a fixed time after completion ("3 days after I last did it").
 
-## Following Reminders (to confirm on a Mac)
+## Repeat options (Decided)
 
-These defaults come from how Reminders is understood to work. Each needs confirming before it becomes a test.
+A repeating task always has a due date. Repeat is only available once a date is set.
 
-- **Rules:** daily, weekly, every 2 weeks, monthly, every 3 months, every 6 months, yearly. Custom: every N days; every N weeks on chosen weekdays; every N months on chosen days of the month or on "the first Monday"-style days; every N years.
-- **Ending a series:** never, or on an end date.
-- **Editing:** changing the open occurrence changes the series, so it applies to it and all future occurrences. Completed occurrences keep what they had.
-- **Due dates:** any task can have a due date, with or without a time, whether it repeats or not.
+- **Presets:** Never, Hourly, Daily, Weekdays, Weekends, Weekly, Biweekly, Monthly, Every 3 Months, Every 6 Months, Yearly.
+- **Custom:**
+  - **Daily:** every N days.
+  - **Weekly:** every N weeks, on chosen weekdays.
+  - **Monthly:** every N months, either on chosen days of the month (for example the 15th) or on an ordinal day: first, second, third, fourth, fifth or last, combined with a weekday, "weekday" or "weekend day" (for example the first Saturday, or the first weekend day).
+  - **Yearly:** every N years, in chosen months, optionally on an ordinal day (for example the first Saturday of January and July).
+- **Limits, as in Reminders:** hourly repeats run all 24 hours, with no time window. A series has one time of day; different times on different days need separate tasks.
 
-## Open questions
+## Time zones (Decided)
 
-- **Time zones.** Whether "due Monday" is a calendar date or a moment in time, and what happens when travelling.
+As in Reminders, times follow the time zone of the device's current location by default, so a task due at 09:00 is due at 09:00 local time after travelling. A setting can fix all tasks to one chosen time zone instead.
+
+## To confirm on a Mac
+
+The videos don't settle these. Each is checked in Reminders before it becomes a test.
+
+- **Overdue, completed before the time of day.** A daily 10:00 task, several days overdue, completed today at 09:00. The rule above gives today at 10:00. Does Reminders give today or tomorrow?
+- **Ending a repeat.** Which options exist, for example "never" and "on a date".
+- **Editing.** Whether changing a repeating task applies to it and all future occurrences, with completed occurrences keeping what they had.
+- **History.** Whether each completed occurrence shows as its own entry in the Completed list.
+- **Ordinal names and limits.** The exact list of ordinals ("fifth", "last") and the range of N.
