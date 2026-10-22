@@ -1,0 +1,53 @@
+//! SQLite storage for randomnote.
+
+use rusqlite::{Connection, OptionalExtension, params};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Task {
+    pub id: String,
+    pub title: String,
+}
+
+pub struct TaskStore {
+    connection: Connection,
+}
+
+impl TaskStore {
+    /// Opens a database that lives only in memory, for tests.
+    pub fn open_in_memory() -> rusqlite::Result<Self> {
+        Self::with_schema(Connection::open_in_memory()?)
+    }
+
+    fn with_schema(connection: Connection) -> rusqlite::Result<Self> {
+        connection.execute_batch(
+            "CREATE TABLE IF NOT EXISTS tasks (
+                id TEXT PRIMARY KEY NOT NULL,
+                title TEXT NOT NULL
+            ) STRICT;",
+        )?;
+        Ok(Self { connection })
+    }
+
+    pub fn save(&self, task: &Task) -> rusqlite::Result<()> {
+        self.connection.execute(
+            "INSERT INTO tasks (id, title) VALUES (?1, ?2)",
+            params![task.id, task.title],
+        )?;
+        Ok(())
+    }
+
+    pub fn find_by_id(&self, id: &str) -> rusqlite::Result<Option<Task>> {
+        self.connection
+            .query_row(
+                "SELECT id, title FROM tasks WHERE id = ?1",
+                params![id],
+                |row| {
+                    Ok(Task {
+                        id: row.get(0)?,
+                        title: row.get(1)?,
+                    })
+                },
+            )
+            .optional()
+    }
+}
