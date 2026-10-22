@@ -46,5 +46,17 @@ export function taskRepositoryContract(
       expect(tasks).toHaveLength(2);
       expect(tasks).toEqual(expect.arrayContaining([milk, dentist]));
     });
+
+    it("updates a task in place when it is saved again with the same ID", async () => {
+      const repository = await makeRepository();
+      await repository.save(aTask("task-1", "Buy milk"));
+
+      await repository.save(aTask("task-1", "Buy oat milk"));
+
+      expect(await repository.findById("task-1")).toEqual(
+        aTask("task-1", "Buy oat milk"),
+      );
+      expect(await repository.list()).toEqual([aTask("task-1", "Buy oat milk")]);
+    });
   });
 }
