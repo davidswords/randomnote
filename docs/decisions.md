@@ -15,6 +15,8 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **A task has a title.** Surrounding whitespace is trimmed; whitespace inside the title is kept as typed.
 - **A title cannot be empty** or whitespace-only. Creating such a task fails with `InvalidTaskTitleError`.
 - **Titles have no length limit** for now, and accept any Unicode text.
+- **Tasks are listed oldest first,** with new tasks added at the bottom, as in Apple Reminders.
+- **An empty title shows "A task needs a title."** and saves nothing.
 - **Renaming changes the task in place.** It stays the same task, with the same ID and record.
 - **Recurring tasks are a series plus occurrences,** and behave exactly like Apple Reminders. See [design/recurring-tasks.md](design/recurring-tasks.md).
 
