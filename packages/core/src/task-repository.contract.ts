@@ -58,5 +58,31 @@ export function taskRepositoryContract(
       );
       expect(await repository.list()).toEqual([aTask("task-1", "Buy oat milk")]);
     });
+
+    it("is not changed by editing a task after saving it", async () => {
+      const repository = await makeRepository();
+      const task = aTask("task-1", "Buy milk");
+      await repository.save(task);
+
+      task.title = "Changed";
+
+      expect(await repository.findById("task-1")).toEqual(
+        aTask("task-1", "Buy milk"),
+      );
+    });
+
+    it("is not changed by editing a task it returned", async () => {
+      const repository = await makeRepository();
+      await repository.save(aTask("task-1", "Buy milk"));
+
+      const found = await repository.findById("task-1");
+      found!.title = "Changed";
+      const [listed] = await repository.list();
+      listed!.title = "Changed";
+
+      expect(await repository.findById("task-1")).toEqual(
+        aTask("task-1", "Buy milk"),
+      );
+    });
   });
 }
