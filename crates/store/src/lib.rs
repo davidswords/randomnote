@@ -30,7 +30,8 @@ impl TaskStore {
 
     pub fn save(&self, task: &Task) -> rusqlite::Result<()> {
         self.connection.execute(
-            "INSERT INTO tasks (id, title) VALUES (?1, ?2)",
+            "INSERT INTO tasks (id, title) VALUES (?1, ?2)
+             ON CONFLICT (id) DO UPDATE SET title = excluded.title",
             params![task.id, task.title],
         )?;
         Ok(())

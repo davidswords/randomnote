@@ -60,3 +60,17 @@ fn lists_every_saved_task() {
     assert!(tasks.contains(&milk));
     assert!(tasks.contains(&dentist));
 }
+
+#[test]
+fn updates_a_task_in_place_when_it_is_saved_again_with_the_same_id() {
+    let store = TaskStore::open_in_memory().unwrap();
+    store.save(&a_task("task-1", "Buy milk")).unwrap();
+
+    store.save(&a_task("task-1", "Buy oat milk")).unwrap();
+
+    assert_eq!(
+        store.find_by_id("task-1").unwrap(),
+        Some(a_task("task-1", "Buy oat milk"))
+    );
+    assert_eq!(store.list().unwrap(), vec![a_task("task-1", "Buy oat milk")]);
+}
