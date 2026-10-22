@@ -1,6 +1,11 @@
+import { newId } from "./id";
+
 export type Task = {
+  id: string;
   title: string;
 };
+
+export type IdGenerator = () => string;
 
 export class InvalidTaskTitleError extends Error {
   constructor() {
@@ -9,10 +14,13 @@ export class InvalidTaskTitleError extends Error {
   }
 }
 
-export function createTask(title: string): Task {
+export function createTask(
+  title: string,
+  generateId: IdGenerator = newId,
+): Task {
   const trimmed = title.trim();
   if (trimmed === "") {
     throw new InvalidTaskTitleError();
   }
-  return { title: trimmed };
+  return { id: generateId(), title: trimmed };
 }
