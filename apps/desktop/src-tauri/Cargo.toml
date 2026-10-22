@@ -1,6 +1,6 @@
 [package]
 name = "randomnote"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple, client-side encrypted todo app"
 authors = ["David Swords"]
 license = "GPL-3.0-only"
