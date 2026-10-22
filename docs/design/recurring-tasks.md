@@ -41,6 +41,7 @@ The next due date comes from the rule and the previous due date, whenever the ta
 - Completed on Monday → the next one is due next Monday.
 - Completed late, on Wednesday → the next one is still due next Monday. Bin day doesn't move.
 - Completed three weeks late → the next one is due next Monday. **Missed occurrences are skipped (Decided):** the next due date is the first scheduled date after the day the task is completed, so a late task never creates a backlog of overdue copies.
+- Completed early, on the Saturday before → the next one is due the Monday after. The next due date is the first scheduled date after **whichever is later: the completion day or the completed occurrence's due date**. Counting from the completion day alone would make the same Monday come back.
 
 ### Completion-based: counts from when it was done
 
