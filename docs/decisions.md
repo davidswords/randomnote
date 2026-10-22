@@ -19,7 +19,8 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Archiving a tag archives its child tags too.**
 - **No built-in Inbox, Projects or Areas sections.** Everything is a tag.
 - **A default `#inbox` tag.** It is created by default and pinned at the top, but it is an ordinary tag, not a special section.
-- **Every task has at least one tag.** A new task is tagged `#inbox` automatically.
+- **Every task has at least one tag.** A new task is tagged `#inbox` automatically, and a task can never be left with no tags.
+- **`#inbox` is not removed automatically.** A task can be in `#inbox` and other tags at the same time.
 - **Any tag can be pinned** to the top.
 - **Smart lists** are saved queries over several tags, and they can be pinned too.
 
@@ -38,8 +39,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 ## Open questions
 
 - Does viewing a parent tag also show tasks from its child tags?
-- Does a task leave `#inbox` automatically when it gets another tag?
-- What happens when the last tag is removed from a task: is that refused, or does the task go back to `#inbox`?
+- Removing a task's last tag: is it refused, or does the task go back to `#inbox`?
 - Is a task created while viewing another tag (for example `Work`) tagged `#inbox`, or with that tag?
 - How does a task show if it has both archived and active tags?
 - Can a child tag be unarchived while its parent stays archived?
