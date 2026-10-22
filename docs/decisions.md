@@ -10,14 +10,24 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Client-side encrypted.** Data is encrypted on the device.
 - **Highly performant.**
 
+## Tasks
+
+- **A task has a title.** Surrounding whitespace is trimmed; whitespace inside the title is kept as typed.
+- **A title cannot be empty** or whitespace-only. Creating such a task fails with `InvalidTaskTitleError`.
+- **Titles have no length limit** for now, and accept any Unicode text.
+
 ## Organising tasks
 
 - **Hierarchical tags.** Tags form a tree, and a task can have several tags.
 - **A list is a level in the tag hierarchy.** There is no separate list or project concept.
 - **The tag hierarchy can change.** Tags can be renamed and moved, and tasks keep their tags through those changes.
 - **Tags can be archived,** so finished projects stop cluttering the sidebar. Apple Reminders can't do this, and old lists pile up.
+- **Archiving a tag archives its child tags too.**
 - **No built-in Inbox, Projects or Areas sections.** Everything is a tag.
 - **A default `#inbox` tag.** It is created by default and pinned at the top, but it is an ordinary tag, not a special section.
+- **Every task has at least one tag.** A new task is tagged `#inbox` automatically, and a task can never be left with no tags.
+- **`#inbox` is not removed automatically.** A task can be in `#inbox` and other tags at the same time.
+- **Removing a task's last tag puts it back in `#inbox`.**
 - **Any tag can be pinned** to the top.
 - **Smart lists** are saved queries over several tags, and they can be pinned too.
 
@@ -36,9 +46,12 @@ Product and technical decisions for randomnote. Add to this file when a decision
 ## Open questions
 
 - Does viewing a parent tag also show tasks from its child tags?
-- Can a task have no tags, or does an untagged task go to `#inbox`? Does a task leave `#inbox` when it gets another tag?
-- Does archiving a tag archive its child tags? How does a task show if it has both archived and active tags?
+- Is a task created while viewing another tag (for example `Work`) tagged `#inbox`, or with that tag?
+- How does a task show if it has both archived and active tags?
+- Can a child tag be unarchived while its parent stays archived?
 - What happens to a tag's tasks when the tag is deleted?
 - Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
 - Encryption: the algorithm, key derivation, what is encrypted, and what happens if the password is lost.
-- Sync between devices: whether to have it, and how.
+- Sync: where the encrypted data is stored, and how conflicting changes from two devices are merged.
+- Accounts: username and password, two-factor authentication, and recovery keys.
+- Business model and licence: whether randomnote stays open source with paid sync, and whether the repository stays public.
