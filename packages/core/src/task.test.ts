@@ -23,4 +23,11 @@ describe("createTask", () => {
   it("rejects an empty title", () => {
     expect(() => createTask("")).toThrow(InvalidTaskTitleError);
   });
+
+  it.each([" ", "   ", "\t", "\n", " \t\n "])(
+    "rejects a whitespace-only title %j",
+    (title) => {
+      expect(() => createTask(title)).toThrow(InvalidTaskTitleError);
+    },
+  );
 });
