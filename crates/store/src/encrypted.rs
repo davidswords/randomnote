@@ -1,9 +1,12 @@
-//! Storage for encrypted data. Everything here is already encrypted, apart
-//! from the account's key parameters, which aren't secret.
+//! Storage for the app's data. Once an account exists, everything here is
+//! encrypted apart from the account's key parameters, which aren't secret.
+//! Before that, tasks are kept unencrypted, as nothing can encrypt them yet.
 
 use std::path::Path;
 
 use rusqlite::{Connection, OptionalExtension, Row, params};
+
+use crate::Task;
 
 /// The key parameters needed to derive the account's keys from its password.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -63,6 +66,10 @@ impl EncryptedStore {
                 items_key_id TEXT NOT NULL,
                 enc_item_key TEXT NOT NULL,
                 content TEXT NOT NULL
+            ) STRICT;
+            CREATE TABLE IF NOT EXISTS unencrypted_tasks (
+                id TEXT PRIMARY KEY NOT NULL,
+                title TEXT NOT NULL
             ) STRICT;",
         )?;
         Ok(Self { connection })
@@ -133,6 +140,47 @@ impl EncryptedStore {
             .query_map([], item_from_row)?
             .collect()
     }
+
+    /// Saves a task kept before the account exists, replacing any with the same ID.
+    pub fn save_unencrypted_task(&self, task: &Task) -> rusqlite::Result<()> {
+        self.connection.execute(
+            "INSERT INTO unencrypted_tasks (id, title) VALUES (?1, ?2)
+             ON CONFLICT (id) DO UPDATE SET title = excluded.title",
+            params![task.id, task.title],
+        )?;
+        Ok(())
+    }
+
+    pub fn find_unencrypted_task(&self, id: &str) -> rusqlite::Result<Option<Task>> {
+        self.connection
+            .query_row(
+                "SELECT id, title FROM unencrypted_tasks WHERE id = ?1",
+                params![id],
+                task_from_row,
+            )
+            .optional()
+    }
+
+    pub fn unencrypted_tasks(&self) -> rusqlite::Result<Vec<Task>> {
+        self.connection
+            .prepare("SELECT id, title FROM unencrypted_tasks")?
+            .query_map([], task_from_row)?
+            .collect()
+    }
+
+    /// Deletes every unencrypted task, then rebuilds the file so their
+    /// contents don't linger in its free pages.
+    pub fn wipe_unencrypted_tasks(&self) -> rusqlite::Result<()> {
+        self.connection
+            .execute_batch("DELETE FROM unencrypted_tasks; VACUUM;")
+    }
+}
+
+fn task_from_row(row: &Row) -> rusqlite::Result<Task> {
+    Ok(Task {
+        id: row.get(0)?,
+        title: row.get(1)?,
+    })
 }
 
 fn items_key_from_row(row: &Row) -> rusqlite::Result<StoredItemsKey> {
