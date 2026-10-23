@@ -10,6 +10,14 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Open source first.** Anyone can download, build and run it on their own hardware from GitHub. The licence is GPL-3.0-only.
 - **Client-side encrypted.** Data is encrypted on the device.
 - **Highly performant.**
+- **A dark theme that's comfortable to look at,** in the spirit of terminal and editor themes such as Zed's: a soft charcoal background rather than black, muted text and a few calm accent colours. No blue-and-white look. The colours live in one set of variables.
+
+## Pricing
+
+- **Free, with no limits:** the app, local use and a free account with encryption.
+- **One paid plan, Sync:** sync across devices and the web app, plus email backups once they exist. Billed monthly or yearly, yearly by default, with a free trial of sync. No lifetime plans, because the server's costs never stop.
+- **Self-hosting the open-source server is free.**
+- **Payments go through a merchant of record** (such as Paddle or Lemon Squeezy), which handles VAT and sales tax worldwide. Cancelling stops sync but leaves the data on every device.
 - **The window shows the app's name and version** (for example "randomtask 0.2.1") at the bottom, on every screen.
 
 ## Tasks
@@ -103,4 +111,5 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
 - The server: where it's hosted, its domain, the payment provider and pricing, and whether emails are verified.
 - Browser storage for the web version: SQLite compiled to WebAssembly, or IndexedDB.
-- Business model and licence: whether randomtask stays open source with paid sync, and whether the repository stays public.
+- Pricing details: the price (around $3 a month or $30 a year was suggested), the length of the free trial, and which merchant of record.
+- Whether the repository stays public.
