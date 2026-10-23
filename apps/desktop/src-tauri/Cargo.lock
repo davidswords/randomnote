@@ -2657,6 +2657,7 @@ dependencies = [
  "randomtask-store",
  "serde",
  "serde_json",
+ "zeroize",
 ]
 
 [[package]]
