@@ -35,8 +35,7 @@ pub struct EncryptedStore {
 }
 
 impl EncryptedStore {
-    /// Opens the database file at `path`, creating it if needed, and deletes
-    /// any unencrypted tasks left by version 0.2.
+    /// Opens the database file at `path`, creating it if needed.
     pub fn open(path: &Path) -> rusqlite::Result<Self> {
         Self::with_schema(Connection::open(path)?)
     }
@@ -66,7 +65,6 @@ impl EncryptedStore {
                 content TEXT NOT NULL
             ) STRICT;",
         )?;
-        delete_unencrypted_tasks(&connection)?;
         Ok(Self { connection })
     }
 
@@ -135,21 +133,6 @@ impl EncryptedStore {
             .query_map([], item_from_row)?
             .collect()
     }
-}
-
-/// Drops version 0.2's plain-text tasks table, then rebuilds the file so the
-/// titles don't linger in free pages.
-fn delete_unencrypted_tasks(connection: &Connection) -> rusqlite::Result<()> {
-    connection
-        .query_row(
-            "SELECT EXISTS (SELECT 1 FROM sqlite_schema WHERE type = 'table' AND name = 'tasks')",
-            [],
-            |row| row.get(0),
-        )
-        .and_then(|has_tasks: bool| match has_tasks {
-            true => connection.execute_batch("DROP TABLE tasks; VACUUM;"),
-            false => Ok(()),
-        })
 }
 
 fn items_key_from_row(row: &Row) -> rusqlite::Result<StoredItemsKey> {

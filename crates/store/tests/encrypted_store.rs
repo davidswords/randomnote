@@ -156,35 +156,6 @@ fn keeps_everything_after_the_database_file_is_closed_and_reopened() {
 }
 
 #[test]
-fn deletes_unencrypted_tasks_from_version_0_2_and_leaves_no_trace_in_the_file() {
-    let directory = tempfile::tempdir().unwrap();
-    let path = directory.path().join("tasks.db");
-    {
-        rusqlite::Connection::open(&path)
-            .unwrap()
-            .execute_batch(
-                "CREATE TABLE tasks (id TEXT PRIMARY KEY NOT NULL, title TEXT NOT NULL) STRICT;
-                 INSERT INTO tasks (id, title) VALUES ('task-1', 'Buy milk');",
-            )
-            .unwrap();
-    }
-
-    EncryptedStore::open(&path).unwrap();
-
-    let bytes = std::fs::read(&path).unwrap();
-    assert!(!contains(&bytes, b"Buy milk"));
-    let tables: Vec<String> = rusqlite::Connection::open(&path)
-        .unwrap()
-        .prepare("SELECT name FROM sqlite_schema WHERE name = 'tasks'")
-        .unwrap()
-        .query_map([], |row| row.get(0))
-        .unwrap()
-        .collect::<Result<_, _>>()
-        .unwrap();
-    assert_eq!(tables, Vec::<String>::new());
-}
-
-#[test]
 fn reports_an_error_when_the_file_is_not_a_database() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("not-a-database.db");
@@ -214,10 +185,4 @@ fn reports_errors_when_the_tables_are_missing() {
     assert!(store.items().is_err());
     assert!(store.find_item("task-1").is_err());
     assert!(store.save_item(&an_item("task-1", "004:milk")).is_err());
-}
-
-fn contains(haystack: &[u8], needle: &[u8]) -> bool {
-    haystack
-        .windows(needle.len())
-        .any(|window| window == needle)
 }

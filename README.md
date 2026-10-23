@@ -14,7 +14,7 @@ brew trust --cask davidswords/tap/randomtask
 brew install randomtask
 ```
 
-randomtask was called randomnote up to version 0.2.0. If you installed it then, `brew upgrade` moves you to randomtask. Tasks from 0.2.0 aren't carried over.
+randomtask was called randomnote up to version 0.2.0. If you installed it then, `brew upgrade` moves you to randomtask. Tasks from 0.2.0 were stored unencrypted, so randomtask deletes them rather than carrying them over.
 
 randomtask isn't signed with an Apple Developer ID yet, so macOS blocks it on first launch. To open it, go to System Settings → Privacy & Security and click **Open Anyway**.
 

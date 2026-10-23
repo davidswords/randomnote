@@ -93,7 +93,7 @@ No server yet. On first launch the user creates an account with a **username and
 
 - **Sign-up:** the password is typed twice and must be at least **12 characters**. The sign-up screen warns that a forgotten password can't be recovered without a recovery key.
 - **Unlocking:** a wrong password shows "Wrong password" and unlocks nothing. It's detected when the stored items key fails to decrypt.
-- **Tasks from 0.2.0 start fresh:** they were stored as plain text, so they're deleted and the old table's space is wiped (`VACUUM`), rather than being migrated.
+- **Tasks from 0.2.0 start fresh:** randomnote stored them as plain text, so on launch randomtask deletes randomnote's data folder rather than migrating it. Deleting can't guarantee the old bytes are gone from an SSD, which is another reason to use full-disk encryption.
 
 ## Open questions
 
