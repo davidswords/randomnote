@@ -37,12 +37,15 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **The tag hierarchy can change.** Tags can be renamed and moved, and tasks keep their tags through those changes.
 - **Tags can be archived,** so finished projects stop cluttering the sidebar. Apple Reminders can't do this, and old lists pile up.
 - **Archiving a tag archives its child tags too.**
+- **Unarchiving a tag also unarchives its archived parents,** so an active tag never sits under an archived one.
+- **Archived tags are hidden on active tasks.** A task that also has an active tag still shows there, without the archived tag.
+- **Selecting a tag shows its tasks and every task in its child tags.**
 - **No built-in Inbox, Projects or Areas sections.** Everything is a tag.
 - **A default `#inbox` tag.** It is created by default and pinned at the top, but it is an ordinary tag, not a special section.
-- **Every task has at least one tag.** A new task is tagged `#inbox` automatically, and a task can never be left with no tags.
+- **Every task has at least one tag.** A new task gets the selected tag, like a file created in a folder, or `#inbox` when no tag is selected. A task can never be left with no tags.
 - **`#inbox` is not removed automatically.** A task can be in `#inbox` and other tags at the same time.
 - **Removing a task's last tag puts it back in `#inbox`.**
-- **Smart lists** are saved queries over several tags.
+- **Smart lists are saved filters.** They match *all* or *any* of a set of filters on task properties, such as tags, due date, importance and flags, as in Apple Reminders. Like tags, they have a colour and an icon.
 - **The sidebar has two parts,** as in Apple Reminders:
   - **Pinned:** tags and smart lists shown as tiles (icon, colour, count of open tasks) in an order the user arranges.
   - **Everything else:** tags listed alphabetically at every level of the hierarchy.
@@ -51,14 +54,14 @@ Product and technical decisions for randomtask. Add to this file when a decision
 
 - **Importance** is set on tags and on tasks, from 1 to 10 (10 is the most important). 7 isn't allowed, so there's no safe middle choice. The default is 1.
 - **Urgency comes from the due date and time.** It isn't set by hand.
-- **The priority score** combines tag importance, task importance and urgency. An important, urgent task in a low-importance tag can rank above minor tasks in an important tag.
+- **A task can have an estimated duration.**
+- **The priority score** combines tag importance, task importance, urgency and estimated duration. An important, urgent task in a low-importance tag can rank above minor tasks in an important tag.
 - **Smart lists sort by any single field** (such as due date or importance) **or by the priority score.**
 - **An expiry window** can be set on a tag or a task: a whole number of hours, days, weeks, months or years. Expiry is separate from the due date.
-- **The window counts from when the task was created.** For a recurring task, each occurrence counts from when that occurrence was created.
-- **The window set highest in the hierarchy wins:** a parent tag's over a child tag's, and a tag's over a task's.
-- **When a task expires:**
+- **A task's window counts from when the task was created,** or for a recurring task, from when each occurrence was created. When it passes:
   - a one-off task is archived;
   - an occurrence of a recurring task is set aside, and the next occurrence appears at its usual time.
+- **When a tag's window passes,** the tag and all its child tags expire together and are archived, with their tasks. A task that also has a tag elsewhere in the hierarchy stays active there, without the expired tag.
 
   This is a deliberate difference from Apple Reminders, which has no expiry.
 
@@ -97,15 +100,10 @@ Product and technical decisions for randomtask. Add to this file when a decision
 
 ## Open questions
 
-- Does viewing a parent tag also show tasks from its child tags?
-- Is a task created while viewing another tag (for example `Work`) tagged `#inbox`, or with that tag?
-- How does a task show if it has both archived and active tags?
-- Can a child tag be unarchived while its parent stays archived?
 - What happens to a tag's tasks when the tag is deleted?
-- Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
-- The priority formula: how tag importance, task importance and urgency are weighed, and whether an estimated duration plays a part.
-- Can a smart list sort by one field, then break ties with another?
-- Which expiry window wins when a task's tags are in different branches of the hierarchy?
+- Which task properties smart lists can filter on, and whether a filter can exclude a tag.
+- The priority formula: how tag importance, task importance, urgency and estimated duration are weighed.
+- When a tag's expiry window starts counting (for example, from when the tag was created).
 - Where can archived and expired tasks be seen, and can they be restored?
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
