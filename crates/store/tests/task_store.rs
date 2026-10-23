@@ -97,7 +97,11 @@ fn updates_a_task_in_place_when_it_is_saved_again_with_the_same_id() {
 fn reports_an_error_when_the_file_is_not_a_database() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("not-a-database.db");
-    std::fs::write(&path, "this is not a database, just some text that fills the header").unwrap();
+    std::fs::write(
+        &path,
+        "this is not a database, just some text that fills the header",
+    )
+    .unwrap();
 
     assert!(TaskStore::open(&path).is_err());
 }
