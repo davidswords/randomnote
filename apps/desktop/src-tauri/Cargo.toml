@@ -1,6 +1,6 @@
 [package]
 name = "randomtask"
-version = "0.4.0"
+version = "0.5.0"
 description = "A simple, client-side encrypted todo app"
 authors = ["David Swords"]
 license = "GPL-3.0-only"
