@@ -52,7 +52,7 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 
 ## Backups
 
-- **Email backups (Decided: wanted).** *To confirm:* Standard Notes emails an encrypted backup file daily, as a paid feature.
+- **Email backups (Decided):** a daily email with an encrypted backup file. Probably a paid feature.
 - *To confirm:* Standard Notes also offers backups to cloud storage (such as Dropbox, Google Drive and OneDrive) and automatic local backups from the desktop app, all importable to restore.
 - Backups contain encrypted data, so they're only as readable as the password allows.
 
@@ -63,12 +63,17 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 - **Where data is stored is flexible (Decided).** randomnote is open source, so people can self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
 - *To confirm:* Standard Notes' server is open source and self-hostable, storing records in a database and files in S3 or on disk.
 
+## First proof of concept (Decided)
+
+No server yet. On first launch the user creates an account with a **username and password** on the device. Keys are derived exactly as above, with the username in place of the email, and tasks are encrypted in the local database. Each launch asks for the password to unlock them. The server password half is unused until a server exists.
+
 ## Open questions
 
+- **Recovery.** It must work like Standard Notes. To check: Standard Notes is understood to have no way to recover data after a forgotten password, with recovery codes only for lost two-factor devices. Is that the intended behaviour, or a recovery key that can unlock the data?
 - **The server.** randomnote needs a server for accounts, sync and email backups. Write our own, or adapt Standard Notes' open source server? Its server stores generic encrypted records, so it might fit.
 - **Using the app without an account.** Standard Notes works offline without an account. Is local data encrypted then (only with a passcode, or always)?
 - **Encrypting local storage.** Are records stored encrypted in the local SQLite database and decrypted on read, or only encrypted for sync and backups?
 - **Where the cryptography runs.** In Rust, for performance, as decided for storage. A future web version would need the same code in the browser, for example compiled to WebAssembly.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
-- **Email backups.** How often they're sent, whether they're a paid feature, and which email service sends them.
+- **Email backups.** Whether they're definitely a paid feature, and which email service sends them.
 - **Accounts versus the roadmap.** In this design the encryption keys come from the account password, so encryption and accounts are built together rather than as separate stages.
