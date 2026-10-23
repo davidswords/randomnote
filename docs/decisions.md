@@ -1,9 +1,10 @@
 # Decisions
 
-Product and technical decisions for randomnote. Add to this file when a decision is made or changed, and move questions out of "Open questions" once they are answered.
+Product and technical decisions for randomtask. Add to this file when a decision is made or changed, and move questions out of "Open questions" once they are answered.
 
 ## Product
 
+- **The app is called randomtask.** It was first published as randomnote (up to 0.2.0); from 0.2.1 the repository, app, bundle ID, Homebrew cask and package names are all randomtask.
 - **A todo app and nothing else.** No calendar, notes, timers or other features that belong in a separate app. The model is Apple's approach of standalone apps that each do one thing.
 - **Minimal.** The design takes inspiration from Apple Reminders. The privacy and encryption model takes inspiration from Standard Notes and Notesnook.
 - **Open source first.** Anyone can download, build and run it on their own hardware from GitHub. The licence is GPL-3.0-only.
@@ -51,7 +52,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Storage sits behind interfaces in `core`,** with an in-memory version for unit tests and real adapters in the apps.
 - **Accounts and encryption behave like Standard Notes** (protocol 004): Argon2id keys from the password, per-record XChaCha20-Poly1305 encryption, an optional local passcode. See [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice (no daily option), probably a paid feature. The app can **import a backup** to check it restores.
-- **Sync has two modes behind one client interface:** bring your own storage (no randomnote server) and a hosted service with a randomnote server.
+- **Sync has two modes behind one client interface:** bring your own storage (no randomtask server) and a hosted service with a randomtask server.
 - **Each user has their own storage bucket;** users' data never shares one.
 - **Encryption at rest:** records are always stored encrypted on the device and decrypted only in memory. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
@@ -70,4 +71,4 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
 - Web version: possibly later, with a browser storage adapter (SQLite compiled to WebAssembly, or IndexedDB) behind the same `TaskRepository`. Encryption code would then need to run in the browser too.
-- Business model and licence: whether randomnote stays open source with paid sync, and whether the repository stays public.
+- Business model and licence: whether randomtask stays open source with paid sync, and whether the repository stays public.

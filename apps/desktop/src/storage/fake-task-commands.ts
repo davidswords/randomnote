@@ -1,4 +1,4 @@
-import type { Task } from "@randomnote/core";
+import type { Task } from "@randomtask/core";
 import type { Invoke } from "./tauri-task-repository";
 
 type Call = { command: string; args?: Record<string, unknown> };

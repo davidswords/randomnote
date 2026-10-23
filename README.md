@@ -1,8 +1,8 @@
-# randomnote
+# randomtask
 
 A minimal, client-side encrypted todo app. It does todos and nothing else: no calendar, notes or timers. Tasks are organised with hierarchical tags.
 
-randomnote is at an early stage. Version 0.1 is only a desktop shell, and the todo features are being built test-first. The decisions behind it are in [docs/decisions.md](docs/decisions.md).
+randomtask is at an early stage. Version 0.1 is only a desktop shell, and the todo features are being built test-first. The decisions behind it are in [docs/decisions.md](docs/decisions.md).
 
 ## Install
 
@@ -10,17 +10,19 @@ randomnote is at an early stage. Version 0.1 is only a desktop shell, and the to
 
 ```
 brew tap davidswords/tap
-brew trust --cask davidswords/tap/randomnote
-brew install randomnote
+brew trust --cask davidswords/tap/randomtask
+brew install randomtask
 ```
 
-randomnote isn't signed with an Apple Developer ID yet, so macOS blocks it on first launch. To open it, go to System Settings → Privacy & Security and click **Open Anyway**.
+randomtask was called randomnote up to version 0.2.0. If you installed it then, `brew upgrade` moves you to randomtask. Tasks from 0.2.0 aren't carried over.
+
+randomtask isn't signed with an Apple Developer ID yet, so macOS blocks it on first launch. To open it, go to System Settings → Privacy & Security and click **Open Anyway**.
 
 ### Download
 
-Each [release](https://github.com/davidswords/randomnote/releases) has a `.dmg` for Apple Silicon Macs.
+Each [release](https://github.com/davidswords/randomtask/releases) has a `.dmg` for Apple Silicon Macs.
 
-Linux, Windows and Intel Mac builds aren't published yet. You can build randomnote yourself on any of them.
+Linux, Windows and Intel Mac builds aren't published yet. You can build randomtask yourself on any of them.
 
 ## Build from source
 

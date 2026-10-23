@@ -1,5 +1,5 @@
 {
-  "name": "@randomnote/core",
+  "name": "@randomtask/core",
   "private": true,
   "type": "module",
   "exports": {

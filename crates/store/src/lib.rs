@@ -1,4 +1,4 @@
-//! SQLite storage for randomnote.
+//! SQLite storage for randomtask.
 
 use std::path::Path;
 

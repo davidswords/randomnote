@@ -2,7 +2,7 @@
 //! from the reference Argon2 C library (through Python's argon2-cffi), not
 //! from this crate.
 
-use randomnote_crypto::{KeyParams, derive_root_key, salt};
+use randomtask_crypto::{KeyParams, derive_root_key, salt};
 
 fn params(identifier: &str, seed: &str) -> KeyParams {
     KeyParams {

@@ -1,7 +1,7 @@
 {
-  "name": "@randomnote/desktop",
+  "name": "@randomtask/desktop",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,7 +15,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@randomnote/core": "*",
+    "@randomtask/core": "*",
     "@tauri-apps/api": "^2.12.4"
   },
   "devDependencies": {

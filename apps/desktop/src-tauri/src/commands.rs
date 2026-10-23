@@ -2,7 +2,7 @@
 
 use std::sync::{Mutex, MutexGuard};
 
-use randomnote_store::{Task, TaskStore};
+use randomtask_store::{Task, TaskStore};
 use tauri::State;
 
 /// The task store, shared by all commands.

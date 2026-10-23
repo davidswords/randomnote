@@ -8,7 +8,7 @@ import { remote } from "webdriverio";
 const DRIVER_PORT = 4444;
 const APPLICATION = resolve(
   import.meta.dirname,
-  "../src-tauri/target/debug/randomnote",
+  "../src-tauri/target/debug/randomtask",
 );
 
 export type RunningApp = Awaited<ReturnType<typeof remote>>;
@@ -26,7 +26,7 @@ export class AppDriver {
   ) {}
 
   static async start(): Promise<AppDriver> {
-    const dataDirectory = mkdtempSync(join(tmpdir(), "randomnote-e2e-"));
+    const dataDirectory = mkdtempSync(join(tmpdir(), "randomtask-e2e-"));
     const driver = spawn("tauri-driver", ["--port", String(DRIVER_PORT)], {
       env: { ...process.env, XDG_DATA_HOME: dataDirectory },
       stdio: "inherit",

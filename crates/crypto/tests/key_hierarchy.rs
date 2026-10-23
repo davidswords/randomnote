@@ -1,7 +1,7 @@
 //! The Standard Notes 004 key hierarchy: the master key encrypts items keys,
 //! items keys encrypt per-item keys, and per-item keys encrypt content.
 
-use randomnote_crypto::{
+use randomtask_crypto::{
     EncryptedItemsKey, ItemsKey, KeyParams, RootKey, decrypt_item, decrypt_items_key,
     derive_root_key, encrypt, encrypt_item, encrypt_items_key,
 };

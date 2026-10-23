@@ -1,4 +1,4 @@
-# randomnote
+# randomtask
 
 A minimal, client-side encrypted, open source todo app built with TypeScript and Tauri 2. Product decisions and open questions are in [docs/decisions.md](docs/decisions.md). Read it before changing behaviour, and update it when a decision is made.
 
@@ -39,7 +39,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 - `npm run test:coverage`: run all TypeScript tests and fail below 100% coverage.
 - `npm run typecheck`: typecheck all workspaces.
 - `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check` in `crates/store`, `crates/crypto` or `apps/desktop/src-tauri`: test and lint the Rust code. On Linux, `src-tauri` needs Tauri's system packages (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `librsvg2-dev`, `libayatana-appindicator3-dev`).
-- `npm run test:e2e -w @randomnote/desktop`: run the end-to-end tests against a debug build (`npm run tauri -w @randomnote/desktop -- build --debug --no-bundle`). On Linux they need `webkit2gtk-driver`, `tauri-driver` (`cargo install tauri-driver --locked`) and a display; in a headless shell, prefix with `xvfb-run -a`.
+- `npm run test:e2e -w @randomtask/desktop`: run the end-to-end tests against a debug build (`npm run tauri -w @randomtask/desktop -- build --debug --no-bundle`). On Linux they need `webkit2gtk-driver`, `tauri-driver` (`cargo install tauri-driver --locked`) and a display; in a headless shell, prefix with `xvfb-run -a`.
 - `npm run dev`: run the desktop app. This needs Rust and the Tauri prerequisites for your OS.
 
 ## CI and releases
@@ -49,6 +49,6 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 
 ## Releasing
 
-1. Bump the version in `apps/desktop/package.json` (`npm version X.Y.Z -w @randomnote/desktop --no-git-tag-version`, with npm 11 so the lockfile format matches) and in `apps/desktop/src-tauri/Cargo.toml` (then `cargo update --workspace` in `src-tauri`). Merge it through a pull request.
+1. Bump the version in `apps/desktop/package.json` (`npm version X.Y.Z -w @randomtask/desktop --no-git-tag-version`, with npm 11 so the lockfile format matches) and in `apps/desktop/src-tauri/Cargo.toml` (then `cargo update --workspace` in `src-tauri`). Merge it through a pull request.
 2. Tag the merge commit on `main` as `vX.Y.Z` and push the tag. The release workflow builds and publishes the `.dmg`.
 3. The `Update casks` workflow in [davidswords/homebrew-tap](https://github.com/davidswords/homebrew-tap) updates the cask daily at 06:17 UTC. Run it by hand to publish sooner.

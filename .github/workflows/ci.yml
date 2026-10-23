@@ -93,9 +93,9 @@ jobs:
       - run: cargo install tauri-driver --locked
       - run: npm ci
       - name: Build the app
-        run: npm run tauri -w @randomnote/desktop -- build --debug --no-bundle
+        run: npm run tauri -w @randomtask/desktop -- build --debug --no-bundle
       - name: Run end-to-end tests
-        run: xvfb-run -a npm run test:e2e -w @randomnote/desktop
+        run: xvfb-run -a npm run test:e2e -w @randomtask/desktop
 
   crypto:
     runs-on: ubuntu-latest
