@@ -1,5 +1,5 @@
 import { type ChildProcess, spawn } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { createConnection } from "node:net";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -14,8 +14,9 @@ const APPLICATION = resolve(
 export type RunningApp = Awaited<ReturnType<typeof remote>>;
 
 /**
- * Drives the built app through tauri-driver. Every launch shares one fresh
- * data directory, so tests start empty and never touch real data.
+ * Drives the built app through tauri-driver. Each driver has a fresh data
+ * directory that its launches share, so tests start empty and never touch
+ * real data.
  */
 export class AppDriver {
   private readonly launched: RunningApp[] = [];
@@ -51,6 +52,13 @@ export class AppDriver {
   async quit(app: RunningApp): Promise<void> {
     this.launched.splice(this.launched.indexOf(app), 1);
     await app.deleteSession();
+  }
+
+  /** The contents of every file the app has written to its data directory. */
+  dataFiles(): Buffer[] {
+    return readdirSync(this.dataDirectory, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .map((entry) => readFileSync(join(entry.parentPath, entry.name)));
   }
 
   /** Quits any app still running, even after a failed test, then stops the driver. */
