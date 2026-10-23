@@ -1,10 +1,11 @@
 import type { RunningApp } from "./app";
 
+export const EMAIL = "david@example.com";
 export const PASSWORD = "correct horse battery staple";
 
 /** Fills in sign-up the way a user would, typing the password twice. */
 export async function signUp(app: RunningApp, password = PASSWORD): Promise<void> {
-  await app.$('input[aria-label="Username"]').setValue("david");
+  await app.$('input[aria-label="Email"]').setValue(EMAIL);
   await app.$('input[aria-label="Password"]').setValue(password);
   await app.$('input[aria-label="Confirm password"]').setValue(password);
   await app.$("button=Create account").click();

@@ -15,7 +15,7 @@ const KEY_BYTES: usize = 32;
 /// The public values a root key is derived from, alongside the password.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KeyParams {
-    /// The account's identifier: the username, or the email once there is a server.
+    /// The account's identifier: its email address.
     pub identifier: String,
     /// A random 256-bit seed, as 64 hex characters, made when the account is created.
     pub seed: String,
