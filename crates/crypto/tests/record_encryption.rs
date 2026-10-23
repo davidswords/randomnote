@@ -106,3 +106,41 @@ fn rejects_another_protocol_version() {
 fn rejects_text_that_is_not_an_encrypted_record() {
     assert!(decrypt("not encrypted", &KEY, "task-1").is_err());
 }
+
+#[test]
+fn rejects_a_nonce_that_is_not_hex() {
+    let corrupt = with_part(MILK_ENCRYPTED, 1, "not-hex");
+
+    assert!(decrypt(&corrupt, &KEY, "task-1").is_err());
+}
+
+#[test]
+fn rejects_a_nonce_of_the_wrong_length() {
+    let corrupt = with_part(MILK_ENCRYPTED, 1, "abcd");
+
+    assert!(decrypt(&corrupt, &KEY, "task-1").is_err());
+}
+
+#[test]
+fn rejects_a_ciphertext_that_is_not_base64() {
+    let corrupt = with_part(MILK_ENCRYPTED, 2, "not base64!");
+
+    assert!(decrypt(&corrupt, &KEY, "task-1").is_err());
+}
+
+#[test]
+fn rejects_authenticated_data_that_is_not_base64_json() {
+    let corrupt = with_part(MILK_ENCRYPTED, 3, "bm90IGpzb24=");
+
+    assert!(decrypt(&corrupt, &KEY, "task-1").is_err());
+}
+
+#[test]
+fn explains_why_decryption_failed() {
+    let error = decrypt(MILK_ENCRYPTED, &[7u8; 32], "task-1").unwrap_err();
+
+    assert_eq!(
+        error.to_string(),
+        "decryption failed: wrong key or tampered record"
+    );
+}

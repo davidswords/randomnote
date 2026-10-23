@@ -18,6 +18,8 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
 - **Rust:** tests in a crate's `tests/` directory use only its public API against real dependencies, so they are integration tests. Pure logic gets unit tests in a `#[cfg(test)]` module next to the code.
 - **Tauri commands:** integration tests in `src-tauri/tests/` send real IPC messages through `tauri::test` against a real store, pinning the command names, argument keys and JSON. The TypeScript adapter's unit tests pin the same messages against a fake `invoke`. Tauri turns Rust `snake_case` argument names into `camelCase` keys, so prefer single-word argument names.
 - **End-to-end tests** (`apps/desktop/e2e/*.e2e.test.ts`) drive the built app through `tauri-driver` and WebDriver, with a fresh temporary data directory, exactly as a user would. `tauri-driver` supports Linux and Windows but not macOS, so they run on Linux. They run with `test:e2e`, not `npm test`.
+- **Coverage is enforced at 100%.** TypeScript: lines, branches, functions and statements (`npm run test:coverage`). Rust: lines (`cargo llvm-cov --fail-under-lines 100`). CI fails below that. The only exclusions are app entry points that only end-to-end tests reach (`apps/desktop/src/main.ts`, `src-tauri/src/app.rs`, `src-tauri/src/main.rs`) and test-only code; add to them only with a written reason.
+- **Error paths are behaviour.** A storage, decoding or decryption failure needs a test showing what the user or caller gets.
 - **Mutation check:** when a test passes as soon as it's written, break the code on purpose and confirm the test fails.
 
 ## Layout
@@ -34,6 +36,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 - `npm ci`: install dependencies.
 - `npm test`: run all tests.
 - `npm run test:unit` / `npm run test:integration`: run one kind on its own.
+- `npm run test:coverage`: run all TypeScript tests and fail below 100% coverage.
 - `npm run typecheck`: typecheck all workspaces.
 - `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check` in `crates/store`, `crates/crypto` or `apps/desktop/src-tauri`: test and lint the Rust code. On Linux, `src-tauri` needs Tauri's system packages (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `librsvg2-dev`, `libayatana-appindicator3-dev`).
 - `npm run test:e2e -w @randomnote/desktop`: run the end-to-end tests against a debug build (`npm run tauri -w @randomnote/desktop -- build --debug --no-bundle`). On Linux they need `webkit2gtk-driver`, `tauri-driver` (`cargo install tauri-driver --locked`) and a display; in a headless shell, prefix with `xvfb-run -a`.

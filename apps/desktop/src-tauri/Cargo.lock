@@ -2428,6 +2428,7 @@ name = "randomnote"
 version = "0.2.0"
 dependencies = [
  "randomnote-store",
+ "rusqlite",
  "serde_json",
  "tauri",
  "tauri-build",

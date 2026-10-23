@@ -32,3 +32,13 @@ describe("TauriTaskRepository messages", () => {
     ]);
   });
 });
+
+describe("fake task commands", () => {
+  it("rejects unknown commands, as Tauri does", async () => {
+    const { invoke } = fakeTaskCommands();
+
+    await expect(invoke("delete_everything")).rejects.toThrow(
+      "Unknown command: delete_everything",
+    );
+  });
+});

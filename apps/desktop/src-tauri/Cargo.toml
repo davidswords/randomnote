@@ -19,6 +19,7 @@ randomnote-store = { version = "0.1.0", path = "../../../crates/store" }
 tauri = { version = "2", features = [] }
 
 [dev-dependencies]
+rusqlite = { version = "0.40", features = ["bundled"] }
 serde_json = "1"
 tauri = { version = "2", features = ["test"] }
 tempfile = "3"

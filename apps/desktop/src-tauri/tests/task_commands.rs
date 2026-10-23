@@ -17,10 +17,14 @@ struct TestApp {
 
 impl TestApp {
     fn with_empty_store() -> Self {
+        Self::with_store(TaskStore::open_in_memory().unwrap())
+    }
+
+    fn with_store(store: TaskStore) -> Self {
         let app = with_task_commands(mock_builder())
             .build(mock_context(noop_assets()))
             .unwrap();
-        app.manage(TaskState::new(TaskStore::open_in_memory().unwrap()));
+        app.manage(TaskState::new(store));
         let webview = WebviewWindowBuilder::new(&app, "main", Default::default())
             .build()
             .unwrap();
@@ -71,4 +75,20 @@ fn list_tasks_returns_every_saved_task() {
     app.invoke("save_task", json!({ "task": task })).unwrap();
 
     assert_eq!(app.invoke("list_tasks", json!({})), Ok(json!([task])));
+}
+
+#[test]
+fn commands_return_storage_errors_as_messages() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("tasks.db");
+    let app = TestApp::with_store(TaskStore::open(&path).unwrap());
+    rusqlite::Connection::open(&path)
+        .unwrap()
+        .execute_batch("DROP TABLE tasks;")
+        .unwrap();
+
+    assert_eq!(
+        app.invoke("list_tasks", json!({})),
+        Err(json!("no such table: tasks"))
+    );
 }

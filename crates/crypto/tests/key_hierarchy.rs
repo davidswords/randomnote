@@ -2,8 +2,8 @@
 //! items keys encrypt per-item keys, and per-item keys encrypt content.
 
 use randomnote_crypto::{
-    ItemsKey, KeyParams, RootKey, decrypt_item, decrypt_items_key, derive_root_key, encrypt_item,
-    encrypt_items_key,
+    EncryptedItemsKey, ItemsKey, KeyParams, RootKey, decrypt_item, decrypt_items_key,
+    derive_root_key, encrypt, encrypt_item, encrypt_items_key,
 };
 
 fn root_key(password: &str) -> RootKey {
@@ -105,4 +105,35 @@ fn cannot_unlock_an_items_key_with_the_wrong_password() {
     let stored = encrypt_items_key(&items_key, &root_key("correct horse battery staple")).unwrap();
 
     assert!(decrypt_items_key(&stored, &root_key("wrong password")).is_err());
+}
+
+/// An items key encrypted correctly, but holding the wrong content, as a
+/// buggy version could write it.
+fn malformed_items_key(root_key: &RootKey, item_key_hex: &str, content: &str) -> EncryptedItemsKey {
+    let item_key: [u8; 32] = [9; 32];
+    EncryptedItemsKey {
+        id: "items-key-1".to_owned(),
+        enc_item_key: encrypt(item_key_hex, root_key.master_key(), "items-key-1").unwrap(),
+        content: encrypt(content, &item_key, "items-key-1").unwrap(),
+    }
+}
+
+#[test]
+fn rejects_an_items_key_whose_content_has_no_key() {
+    let root_key = root_key("correct horse battery staple");
+    let stored = malformed_items_key(&root_key, &"09".repeat(32), r#"{"version":"004"}"#);
+
+    let error = decrypt_items_key(&stored, &root_key).err().unwrap();
+
+    assert_eq!(error.to_string(), "items key content has no key");
+}
+
+#[test]
+fn rejects_an_item_key_of_the_wrong_length() {
+    let root_key = root_key("correct horse battery staple");
+    let stored = malformed_items_key(&root_key, "abcd", r#"{"version":"004"}"#);
+
+    let error = decrypt_items_key(&stored, &root_key).err().unwrap();
+
+    assert_eq!(error.to_string(), "invalid key length");
 }

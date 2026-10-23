@@ -92,3 +92,25 @@ fn updates_a_task_in_place_when_it_is_saved_again_with_the_same_id() {
         vec![a_task("task-1", "Buy oat milk")]
     );
 }
+
+#[test]
+fn reports_an_error_when_the_file_is_not_a_database() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("not-a-database.db");
+    std::fs::write(&path, "this is not a database, just some text that fills the header").unwrap();
+
+    assert!(TaskStore::open(&path).is_err());
+}
+
+#[test]
+fn reports_an_error_when_saving_fails() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("randomnote.db");
+    let store = TaskStore::open(&path).unwrap();
+    rusqlite::Connection::open(&path)
+        .unwrap()
+        .execute_batch("DROP TABLE tasks;")
+        .unwrap();
+
+    assert!(store.save(&a_task("task-1", "Buy milk")).is_err());
+}
