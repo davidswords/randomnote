@@ -1,6 +1,5 @@
 //! Encrypted task storage, unlocked by the account password.
 
-mod email;
 mod error;
 
 use std::collections::HashMap;
@@ -49,7 +48,7 @@ impl Vault {
     /// Creates the device's account, then unlocks the vault.
     /// The email is stored trimmed and in lower case.
     pub fn create_account(&mut self, email: &str, password: &str) -> Result<(), VaultError> {
-        let email = email::normalise(email).ok_or(VaultError::InvalidEmail)?;
+        let email = randomtask_crypto::normalise_email(email).ok_or(VaultError::InvalidEmail)?;
         if password.chars().count() < MINIMUM_PASSWORD_CHARACTERS {
             return Err(VaultError::PasswordTooShort);
         }

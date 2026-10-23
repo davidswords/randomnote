@@ -107,6 +107,16 @@ No server yet. On first launch the user creates an account with an **email and p
 
 Still no server. The app opens straight into the task list, storing tasks unencrypted, with a notice that they aren't encrypted. Creating a free account from the notice or the account menu (bottom left) creates it on the device, encrypts the existing tasks and wipes the unencrypted copies from the database file. After that, each launch asks for the password, as in 0.3.
 
+## The server (stage 5)
+
+Our own server in Rust, in `crates/server`, at the paths and in the formats the Standard Notes client uses, as read from Standard Notes' server and app source.
+
+- **Registering:** `POST /v1/users` with the email, the server password, the seed (`pw_nonce`), the version (`004`), and optionally `origination` and `created`. The email is stored trimmed and in lower case. An email that's already registered is refused, as in Standard Notes.
+- **The server password** is stored as a bcrypt hash with a cost of 11, as in Standard Notes.
+- **Sessions:** registering starts a session. Its tokens are `1:<session uuid>:<token>`, with 48 random bytes per token, and only their SHA-256 hashes are stored. *To confirm:* access tokens last 60 days and the session can be refreshed for a year; these are recalled from Standard Notes' sample configuration, not read from it.
+- **Errors** are JSON, `{"error": {"message": "..."}}`, with messages written for the user. A storage failure doesn't reveal its detail.
+- **Next:** signing in (`POST /v2/login-params` and `POST /v2/login`, with PKCE and made-up key parameters for unknown emails, so they can't be discovered), refreshing and signing out, then the app using the server.
+
 ## Open questions
 
 - **Where the cryptography runs.** In Rust on the desktop, and the same Rust compiled to WebAssembly in the browser.
