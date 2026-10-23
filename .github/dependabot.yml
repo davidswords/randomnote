@@ -24,3 +24,8 @@ updates:
     directory: /crates/crypto
     schedule:
       interval: weekly
+
+  - package-ecosystem: cargo
+    directory: /crates/vault
+    schedule:
+      interval: weekly
