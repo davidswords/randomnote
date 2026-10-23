@@ -60,12 +60,39 @@ jobs:
         with:
           persist-credentials: false
 
+      # Packages that finished downloading are kept even when a run fails, so a
+      # slow mirror only delays the first runs, and later runs skip it.
+      - name: Restore cached Ubuntu packages
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/apt-archives
+          key: apt-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: apt-${{ github.job }}-
+
       - name: Install Tauri's Linux build dependencies
         # A stalled package mirror fails here quickly instead of using up the job's time.
         timeout-minutes: 10
         run: |
+          # Prefer Canonical's own mirror; the runner's default has been slow.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|' /etc/apt/apt-mirrors.txt
+            cat /etc/apt/apt-mirrors.txt
+          fi
+          mkdir -p "$HOME/apt-archives/partial"
           sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
-          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o APT::Sandbox::User=root -o Dir::Cache::Archives="$HOME/apt-archives" install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev
+
+      - name: Let the cache read the packages apt downloaded as root
+        if: always()
+        run: sudo chown -R "$USER" "$HOME/apt-archives"
+
+      - name: Save Ubuntu packages for later runs
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/apt-archives
+          key: apt-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - run: rustup component add rustfmt clippy llvm-tools-preview
       - run: cargo fmt --check
@@ -87,12 +114,39 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      # Packages that finished downloading are kept even when a run fails, so a
+      # slow mirror only delays the first runs, and later runs skip it.
+      - name: Restore cached Ubuntu packages
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/apt-archives
+          key: apt-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: apt-${{ github.job }}-
+
       - name: Install Tauri's Linux dependencies, WebKitWebDriver and Xvfb
         # A stalled package mirror fails here quickly instead of using up the job's time.
         timeout-minutes: 10
         run: |
+          # Prefer Canonical's own mirror; the runner's default has been slow.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|' /etc/apt/apt-mirrors.txt
+            cat /etc/apt/apt-mirrors.txt
+          fi
+          mkdir -p "$HOME/apt-archives/partial"
           sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 update
-          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev webkit2gtk-driver xvfb
+          sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o APT::Sandbox::User=root -o Dir::Cache::Archives="$HOME/apt-archives" install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libayatana-appindicator3-dev webkit2gtk-driver xvfb
+
+      - name: Let the cache read the packages apt downloaded as root
+        if: always()
+        run: sudo chown -R "$USER" "$HOME/apt-archives"
+
+      - name: Save Ubuntu packages for later runs
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/apt-archives
+          key: apt-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - run: cargo install tauri-driver --locked
       - run: npm ci

@@ -57,7 +57,7 @@ Three layers of keys:
 
 A seized or stolen device, or a drive removed from it, must yield only ciphertext. This is stronger than Standard Notes' default, which keeps the master key in the operating system's keychain unless a local passcode is set.
 
-- **Records are always stored encrypted** in the local database, whether or not a passcode is set. They are decrypted only in memory, in Rust, and only the results cross into the web view.
+- **Once an account exists, records are always stored encrypted** in the local database, whether or not a passcode is set. Without an account, tasks are stored unencrypted until the user adds an email and password. They are decrypted only in memory, in Rust, and only the results cross into the web view.
 - **The key is never stored unprotected on disk.** By default the password unlocks the app at every launch, so the key exists only in memory while the app is open.
 - **Staying signed in is opt-in:** "stay signed in on this device" stores the key in the operating system's keychain (the macOS Keychain), trading some protection for convenience.
 - **The app can be locked** on demand and after a period of inactivity, which clears the key from memory.
@@ -91,7 +91,11 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 - **Where data is stored is flexible (Decided).** randomtask is open source, so people can bring their own storage or self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
 - *To confirm:* Standard Notes' server is open source and self-hostable, storing records in a database and files in S3 or on disk.
 
-## First proof of concept (Decided)
+## Account tiers (Decided)
+
+With no account the app works locally, unencrypted. A free account (email and password) is registered with the randomtask server and encrypts the device's data. A subscription turns on sync, which goes through the server; only the server holds S3 credentials.
+
+## First proof of concept (0.3)
 
 No server yet. On first launch the user creates an account with an **email and password** on the device. Keys are derived exactly as above, and tasks are encrypted in the local database. The email isn't verified until there is a server. Each launch asks for the password to unlock them. The server password half is unused until a server exists.
 
@@ -102,8 +106,7 @@ No server yet. On first launch the user creates an account with an **email and p
 ## Open questions
 
 - **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.
-- **Using the app without an account.** Standard Notes works offline without an account. Is local data encrypted then (only with a passcode, or always)?
-- **Where the cryptography runs.** In Rust, for performance, as decided for storage. A future web version would need the same code in the browser, for example compiled to WebAssembly.
+- **Where the cryptography runs.** In Rust on the desktop, and the same Rust compiled to WebAssembly in the browser.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
 - **Email backups.** Whether they're definitely a paid feature, and which email service sends them.
 - **Local backup snapshots.** How often they're taken, how long they're kept, and where the folder lives on iOS and Android.
