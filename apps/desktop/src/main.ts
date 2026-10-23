@@ -2,20 +2,27 @@ import * as tauriApp from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { showAbout } from "./about";
 import { showAccountScreen } from "./account-view";
+import { showApp } from "./app-shell";
 import { TauriAccounts } from "./storage/tauri-accounts";
 import { TauriTaskRepository } from "./storage/tauri-task-repository";
-import { showTaskList } from "./task-list-view";
 import "./style.css";
 
 const app = document.querySelector<HTMLElement>("#app");
 const footer = document.querySelector<HTMLElement>("#about");
+const services = {
+  accounts: new TauriAccounts(invoke),
+  repository: new TauriTaskRepository(invoke),
+};
 
 if (footer) {
   void showAbout(footer, tauriApp);
 }
 
 if (app) {
-  void showAccountScreen(app, new TauriAccounts(invoke), () =>
-    showTaskList(app, new TauriTaskRepository(invoke)),
+  // With an account, the password unlocks the app first; without one, it opens straight away.
+  void services.accounts.hasAccount().then((hasAccount) =>
+    hasAccount
+      ? showAccountScreen(app, services.accounts, () => showApp(app, services))
+      : showApp(app, services),
   );
 }

@@ -1,9 +1,111 @@
+/* A dark theme that's comfortable to look at, in the spirit of terminal and
+   editor themes such as Zed's One Dark: soft charcoal rather than black, muted
+   text and calm accents. Every colour lives here. */
+:root {
+  --background: #282c34;
+  --surface: #2f343f;
+  --border: #3e4451;
+  --text: #abb2bf;
+  --muted: #7f848e;
+  --accent: #98c379;
+  --accent-text: #1e2127;
+  --warning: #e5c07b;
+  --danger: #e06c75;
+
+  color-scheme: dark;
+  background: var(--background);
+  color: var(--text);
+  font: 15px/1.5 system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 1rem 1rem 3rem;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+button {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+[role="alert"] {
+  color: var(--danger);
+}
+
+[role="status"] {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+[role="status"] p {
+  flex: 1;
+  margin: 0;
+}
+
+[role="dialog"] {
+  position: fixed;
+  inset: 15% 10% auto;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+nav {
+  position: fixed;
+  bottom: 0.5rem;
+  left: 1rem;
+}
+
+[role="menu"] {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 0;
+  min-width: 16rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
 footer {
   position: fixed;
   bottom: 0.5rem;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font: 0.75rem system-ui, sans-serif;
-  color: gray;
+  right: 1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
 }

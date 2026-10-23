@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AppDriver } from "./app";
-import { PASSWORD, addTask, enterPassword, shownTitles, signUp } from "./user";
+import { addTask, shownTitles, waitForTaskList } from "./user";
 
 let driver: AppDriver;
 
@@ -13,15 +13,14 @@ afterEach(async () => {
 });
 
 describe("persistence", () => {
-  it("keeps a task after the app is closed and opened again", async () => {
+  it("keeps a task after the app is closed and opened again, with no account", async () => {
     const firstRun = await driver.launch();
-    await signUp(firstRun);
+    await waitForTaskList(firstRun);
     await addTask(firstRun, "Buy milk");
     await driver.quit(firstRun);
 
     const secondRun = await driver.launch();
-    await enterPassword(secondRun, PASSWORD);
-    await secondRun.$('[aria-label="Tasks"]').waitForExist();
+    await waitForTaskList(secondRun);
 
     expect(await shownTitles(secondRun)).toEqual(["Buy milk"]);
   });

@@ -40,8 +40,27 @@ fn list_tasks_returns_every_saved_task() {
 }
 
 #[test]
-fn task_commands_are_refused_while_locked() {
+fn task_commands_work_without_an_account() {
     let app = TestApp::without_account();
+    let task = json!({ "id": "task-1", "title": "Buy milk" });
+
+    app.invoke("save_task", json!({ "task": task })).unwrap();
+
+    assert_eq!(
+        app.invoke("find_task", json!({ "id": "task-1" })),
+        Ok(task.clone())
+    );
+    assert_eq!(app.invoke("list_tasks", json!({})), Ok(json!([task])));
+}
+
+#[test]
+fn task_commands_are_refused_while_an_account_is_locked() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("randomtask.db");
+    TestApp::with_store(EncryptedStore::open(&path).unwrap())
+        .create_account()
+        .unwrap();
+    let app = TestApp::with_store(EncryptedStore::open(&path).unwrap());
     let task = json!({ "id": "task-1", "title": "Buy milk" });
 
     assert_eq!(

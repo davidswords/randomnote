@@ -26,7 +26,7 @@ describe("upgrading from an unencrypted version", () => {
     writeFile(randomtaskTasks, "Buy milk");
 
     const app = await driver.launch();
-    await app.$('input[aria-label="Email"]').waitForExist();
+    await app.$('input[aria-label="New task"]').waitForExist();
 
     expect(existsSync(randomnoteTasks)).toBe(false);
     expect(existsSync(randomtaskTasks)).toBe(false);

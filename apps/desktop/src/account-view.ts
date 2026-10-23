@@ -20,7 +20,8 @@ export async function showAccountScreen(
   }
 }
 
-function showSignUp(root: HTMLElement, accounts: Accounts, onUnlocked: () => unknown) {
+/** Shows the sign-up form in `root`. Calls `onUnlocked` once the account is created. */
+export function showSignUp(root: HTMLElement, accounts: Accounts, onUnlocked: () => unknown) {
   const email = input("Email", "email");
   const password = input("Password", "password");
   const confirmation = input("Confirm password", "password");
