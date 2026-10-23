@@ -7,7 +7,7 @@ use std::io;
 use std::path::Path;
 
 pub use app::run;
-pub use commands::VaultState;
+pub use commands::{Server, VaultState};
 use randomtask_store::EncryptedStore;
 use randomtask_vault::Vault;
 use tauri::{Builder, Runtime};
