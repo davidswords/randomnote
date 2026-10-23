@@ -15,15 +15,20 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+randomtask-api = { version = "0.1.0", path = "../../../crates/client/api" }
 randomtask-store = { version = "0.1.0", path = "../../../crates/client/store" }
 randomtask-vault = { version = "0.1.0", path = "../../../crates/client/vault" }
 tauri = { version = "2", features = [] }
 
 [dev-dependencies]
+axum = "0.8"
+randomtask-server = { version = "0.1.0", path = "../../../crates/server" }
+reqwest = { version = "0.13", features = ["json"] }
 rusqlite = { version = "0.40", features = ["bundled"] }
 serde_json = "1"
 tauri = { version = "2", features = ["test"] }
 tempfile = "3"
+tokio = { version = "1", features = ["net", "rt-multi-thread"] }
 
 # Argon2 is deliberately slow; optimise it even in debug builds and tests, so
 # unlocking takes a moment rather than many seconds.
@@ -31,6 +36,13 @@ tempfile = "3"
 opt-level = 3
 
 [profile.dev.package.blake2]
+opt-level = 3
+
+# The tests run the real server, whose bcrypt is deliberately slow too.
+[profile.dev.package.bcrypt]
+opt-level = 3
+
+[profile.dev.package.blowfish]
 opt-level = 3
 
 [profile.release]

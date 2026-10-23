@@ -4,7 +4,7 @@
 // Each test binary uses a different part of this module.
 #![allow(dead_code)]
 
-use randomtask_lib::{VaultState, with_commands};
+use randomtask_lib::{Server, VaultState, with_commands};
 use randomtask_store::EncryptedStore;
 use randomtask_vault::Vault;
 use serde_json::Value;
@@ -35,10 +35,20 @@ impl TestApp {
     }
 
     pub fn with_store(store: EncryptedStore) -> Self {
+        Self::with_store_and_server(store, Server::none())
+    }
+
+    /// An app that registers accounts with the server at `url`.
+    pub fn with_server(store: EncryptedStore, url: &str) -> Self {
+        Self::with_store_and_server(store, Server::at(url))
+    }
+
+    fn with_store_and_server(store: EncryptedStore, server: Server) -> Self {
         let app = with_commands(mock_builder())
             .build(mock_context(noop_assets()))
             .unwrap();
         app.manage(VaultState::new(Vault::new(store)));
+        app.manage(server);
         let webview = WebviewWindowBuilder::new(&app, "main", Default::default())
             .build()
             .unwrap();

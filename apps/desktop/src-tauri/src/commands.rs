@@ -2,8 +2,9 @@
 
 use std::sync::{Mutex, MutexGuard};
 
+use randomtask_api::{ClientError, ServerClient, SignInChallenge};
 use randomtask_store::Task;
-use randomtask_vault::Vault;
+use randomtask_vault::{Registration, Session, Vault};
 use tauri::State;
 
 /// The vault, shared by all commands.
@@ -19,26 +20,107 @@ impl VaultState {
     }
 }
 
+/// The randomtask server accounts are registered with, if there is one yet.
+/// Without one, accounts stay on the device.
+pub struct Server(Option<ServerClient>);
+
+impl Server {
+    pub fn none() -> Self {
+        Self(None)
+    }
+
+    pub fn at(url: &str) -> Self {
+        Self(Some(ServerClient::new(url)))
+    }
+}
+
 #[tauri::command]
 pub fn has_account(state: State<'_, VaultState>) -> Result<bool, String> {
     state.vault()?.has_account().map_err(to_message)
 }
 
+/// Creates the account. With a server, it's registered there first, and
+/// nothing is stored on the device unless that succeeds.
 #[tauri::command]
-pub fn create_account(
+pub async fn create_account(
     state: State<'_, VaultState>,
+    server: State<'_, Server>,
     email: String,
     password: String,
 ) -> Result<(), String> {
+    let Some(client) = &server.0 else {
+        return state
+            .vault()?
+            .create_account(&email, &password)
+            .map_err(to_message);
+    };
+    let account = state
+        .vault()?
+        .prepare_account(&email, &password)
+        .map_err(to_message)?;
+    let session = client
+        .register(&account.key_params(), account.server_password())
+        .await
+        .map_err(to_message)?;
     state
         .vault()?
-        .create_account(&email, &password)
+        .create_registered_account(account, &vault_session(session))
         .map_err(to_message)
 }
 
+/// Unlocks the vault. With a server, an account made on the device before
+/// there was one is then registered. If that fails, unlocking still succeeds,
+/// and the next unlock tries again.
 #[tauri::command]
-pub fn unlock(state: State<'_, VaultState>, password: String) -> Result<(), String> {
-    state.vault()?.unlock(&password).map_err(to_message)
+pub async fn unlock(
+    state: State<'_, VaultState>,
+    server: State<'_, Server>,
+    password: String,
+) -> Result<(), String> {
+    let registration = {
+        let mut vault = state.vault()?;
+        vault.unlock(&password).map_err(to_message)?;
+        vault.pending_registration().map_err(to_message)?
+    };
+    if let (Some(client), Some(registration)) = (&server.0, registration)
+        && let Ok(session) = register_or_sign_in(client, &registration).await
+    {
+        state
+            .vault()?
+            .save_session(&vault_session(session))
+            .map_err(to_message)?;
+    }
+    Ok(())
+}
+
+/// Registers the account, or signs in if it's already registered with the
+/// same keys, as when an earlier registration's session was lost.
+async fn register_or_sign_in(
+    client: &ServerClient,
+    registration: &Registration,
+) -> Result<randomtask_api::Session, ClientError> {
+    let params = registration.key_params();
+    match client
+        .register(&params, registration.server_password())
+        .await
+    {
+        Err(ClientError::Refused(_)) => {
+            let challenge: SignInChallenge = client.key_params(&params.identifier).await?;
+            client
+                .sign_in(challenge, registration.server_password())
+                .await
+        }
+        result => result,
+    }
+}
+
+fn vault_session(session: randomtask_api::Session) -> Session {
+    Session {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        access_expiration: session.access_expiration,
+        refresh_expiration: session.refresh_expiration,
+    }
 }
 
 #[tauri::command]
