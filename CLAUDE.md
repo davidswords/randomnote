@@ -41,7 +41,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 
 ## CI and releases
 
-- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for `crates/store`, `crates/crypto` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux.
+- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for `crates/store`, `crates/crypto` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `cross-platform` job runs the Rust crates' tests on Windows and macOS, and compiles them for iOS and Android, so platform-specific breakage is caught on every pull request.
 - `.github/workflows/release.yml` builds the Apple Silicon `.dmg`. On a `v*` tag it publishes a GitHub release. The tag must match the version in `apps/desktop/package.json`.
 
 ## Releasing

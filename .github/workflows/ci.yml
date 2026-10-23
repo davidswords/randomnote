@@ -107,3 +107,65 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets --locked -- -D warnings
       - run: cargo test --locked
+
+  cross-platform:
+    name: cross-platform (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: windows
+            os: windows-latest
+            command: test
+            targets: ""
+          - name: macos
+            os: macos-15
+            command: test
+            targets: ""
+          - name: ios
+            os: macos-15
+            command: check
+            targets: aarch64-apple-ios
+          - name: android
+            os: ubuntu-latest
+            command: check
+            targets: aarch64-linux-android x86_64-linux-android
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Add Rust targets
+        if: matrix.targets != ''
+        run: rustup target add ${{ matrix.targets }}
+
+      - name: Use the Android NDK's C compilers for bundled SQLite
+        if: matrix.name == 'android'
+        run: |
+          bin="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          {
+            echo "CC_aarch64_linux_android=$bin/aarch64-linux-android24-clang"
+            echo "AR_aarch64_linux_android=$bin/llvm-ar"
+            echo "CC_x86_64_linux_android=$bin/x86_64-linux-android24-clang"
+            echo "AR_x86_64_linux_android=$bin/llvm-ar"
+          } >> "$GITHUB_ENV"
+
+      - name: Build each crate for the platform
+        env:
+          COMMAND: ${{ matrix.command }}
+          TARGETS: ${{ matrix.targets }}
+        run: |
+          for crate in crates/crypto crates/store; do
+            if [ -z "$TARGETS" ]; then
+              (cd "$crate" && cargo "$COMMAND" --locked)
+            else
+              for target in $TARGETS; do
+                (cd "$crate" && cargo "$COMMAND" --locked --target "$target")
+              done
+            fi
+          done
