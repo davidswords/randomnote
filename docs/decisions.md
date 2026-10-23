@@ -50,9 +50,10 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Storage and sync encrypt each record separately,** as Standard Notes and Notesnook do. Sync sends only changed records, conflicts are resolved per record, and the server only sees ciphertext.
 - **Storage sits behind interfaces in `core`,** with an in-memory version for unit tests and real adapters in the apps.
 - **Accounts and encryption behave like Standard Notes** (protocol 004): Argon2id keys from the password, per-record XChaCha20-Poly1305 encryption, an optional local passcode. See [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
-- **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice, probably a paid feature. The app can **import a backup** to check it restores.
+- **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice (no daily option), probably a paid feature. The app can **import a backup** to check it restores.
 - **Sync has two modes behind one client interface:** bring your own storage (no randomnote server) and a hosted service with a randomnote server.
 - **Each user has their own storage bucket;** users' data never shares one.
+- **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
 - **The first accounts proof of concept has no server:** a local username and password that encrypt the data on the device.
 - **Sync can be switched off, uploads can be size-limited, and storage is flexible,** with S3-compatible storage as the likely default.
 - **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.

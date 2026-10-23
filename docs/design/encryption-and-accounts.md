@@ -39,7 +39,14 @@ Three layers of keys:
 ## Changing or losing the password *(from the specification)*
 
 - **Changing it** derives a new master key and re-encrypts only the items keys. Tasks themselves don't need re-encrypting. A new items key is also made for future data.
-- **Losing it:** the specification has no recovery mechanism. Without the password, the data can't be decrypted by anyone, including the server. *To confirm:* exactly what Standard Notes offers here.
+- **Losing it:** the specification has no recovery mechanism. Without the password, the data can't be decrypted by anyone, including the server.
+
+## Recovery key (Decided)
+
+- **Optional, never forced.** Signup doesn't require one. Users can create a recovery key in the app's settings at any time.
+- **Created on the device and shown once.** The app stores an extra copy of the data keys encrypted with the recovery key; the recovery key itself is never stored. With it, a user who forgets their password can unlock their data and set a new password.
+- **Without one, behaviour matches Standard Notes:** a forgotten password means the data can't be recovered. The app says so clearly at signup.
+- *Open:* replacing or removing a recovery key, and confirming the user has saved it before it counts.
 
 ## Local passcode *(from the specification)*
 
@@ -52,7 +59,7 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 
 ## Backups
 
-- **Email backups (Decided):** an email with an encrypted backup file, at a frequency the user chooses: **weekly, monthly or quarterly**. Probably a paid feature.
+- **Email backups (Decided):** an email with an encrypted backup file, at a frequency the user chooses: **weekly, monthly or quarterly**. There's no daily option, to keep sending volume reasonable. Probably a paid feature.
 - **Import and restore (Decided):** the app can import a backup file and decrypt it with the password, so users can check a backup works before they need it.
 - *To confirm:* Standard Notes also offers backups to cloud storage (such as Dropbox, Google Drive and OneDrive) and automatic local backups from the desktop app, all importable to restore.
 - Backups contain encrypted data, so they're only as readable as the password allows.
@@ -74,11 +81,10 @@ No server yet. On first launch the user creates an account with a **username and
 
 ## Open questions
 
-- **Recovery.** It must work like Standard Notes. To check: Standard Notes is understood to have no way to recover data after a forgotten password, with recovery codes only for lost two-factor devices. Is that the intended behaviour, or a recovery key that can unlock the data?
 - **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.
 - **Using the app without an account.** Standard Notes works offline without an account. Is local data encrypted then (only with a passcode, or always)?
 - **Encrypting local storage.** Are records stored encrypted in the local SQLite database and decrypted on read, or only encrypted for sync and backups?
 - **Where the cryptography runs.** In Rust, for performance, as decided for storage. A future web version would need the same code in the browser, for example compiled to WebAssembly.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
-- **Email backups.** Whether they're definitely a paid feature, which email service sends them, and whether a daily option is offered too.
+- **Email backups.** Whether they're definitely a paid feature, and which email service sends them.
 - **Accounts versus the roadmap.** In this design the encryption keys come from the account password, so encryption and accounts are built together rather than as separate stages.
