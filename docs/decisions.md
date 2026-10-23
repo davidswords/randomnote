@@ -90,6 +90,7 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Creating a free account needs the server,** as in Standard Notes. If it can't be reached, sign-up fails with a message and the tasks stay unencrypted.
 - **Accounts made on the device in 0.3 and 0.4 are registered with the server when next unlocked,** with the same email and keys, so nothing changes for the user.
 - **The app's server client is built and tested before hosting is chosen,** against the real server code, but stays out of releases until the server is live.
+- **The server sets a minimum app version.** An app older than that shows "Please update randomtask" and stops syncing until it's updated. The minimum is raised whenever a release changes the task format, so an older app can never sync away fields it doesn't know about.
 - **The domain is randomtask.ch.** Where the server is hosted is decided before sync, the first stage that needs it live.
 - **Encryption at rest:** once an email and password are added, records are always stored encrypted on the device and decrypted only in memory. Before that, tasks are stored unencrypted, as in Standard Notes, and the app says so. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
