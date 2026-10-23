@@ -33,6 +33,10 @@ const SCHEMA: &str = "
         user_uuid TEXT NOT NULL REFERENCES users (uuid),
         expires_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS settings (
+        name TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS failed_sign_ins (
         email TEXT PRIMARY KEY,
         failures INTEGER NOT NULL,
@@ -71,6 +75,27 @@ impl Database {
         let connection = Connection::open(path).map_err(storage)?;
         connection.execute_batch(SCHEMA).map_err(storage)?;
         Ok(Self { connection })
+    }
+
+    /// The secret that made-up key parameters for unknown emails come from.
+    /// Made at random the first time it's asked for, then kept, so the
+    /// made-up parameters stay the same across restarts.
+    pub fn pseudo_key(&self) -> Result<String, ServerError> {
+        let mut bytes = [0u8; 32];
+        getrandom::fill(&mut bytes).expect("the operating system provides randomness");
+        self.connection
+            .execute(
+                "INSERT OR IGNORE INTO settings (name, value) VALUES ('pseudo_key', ?1)",
+                [hex::encode(bytes)],
+            )
+            .and_then(|_| {
+                self.connection.query_row(
+                    "SELECT value FROM settings WHERE name = 'pseudo_key'",
+                    [],
+                    |row| row.get(0),
+                )
+            })
+            .map_err(storage)
     }
 
     /// Stores the user and their first session together, or neither.
