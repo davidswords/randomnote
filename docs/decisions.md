@@ -69,6 +69,7 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Storage and sync encrypt each record separately,** as Standard Notes and Notesnook do. Sync sends only changed records, conflicts are resolved per record, and the server only sees ciphertext.
 - **Storage sits behind interfaces in `core`,** with an in-memory version for unit tests and real adapters in the apps.
 - **Accounts and encryption behave like Standard Notes** (protocol 004): Argon2id keys from the password, per-record XChaCha20-Poly1305 encryption, an optional local passcode. See [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
+- **A local backup folder, on by default:** an encrypted copy of the account in `~/randomtask/<email>/` (or a location the user chooses), laid out as in S3, as a mirror plus periodic snapshots. A fresh install can restore from it with the password alone. It's a backup, not a sync method.
 - **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice (no daily option), probably a paid feature. The app can **import a backup** to check it restores.
 - **Sync has two modes behind one client interface:** bring your own storage (no randomtask server) and a hosted service with a randomtask server.
 - **Each user has their own storage bucket;** users' data never shares one.

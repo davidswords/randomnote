@@ -71,15 +71,19 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 
 ## Backups
 
+- **Local backup folder (Decided):** on by default, the desktop app keeps an encrypted copy of the account in `~/randomtask/<email>/`. The user can choose another location.
+  - **Same layout as the account's S3 storage:** the key parameters (email, seed and version, which aren't secret), the encrypted items keys, and one encrypted file per item.
+  - **A mirror plus snapshots:** the mirror always matches the current data, and periodic dated snapshots keep earlier states, so a deleted or corrupted task can be recovered.
+  - **Restoring needs only the folder and the password:** a fresh install can restore the account from it, with no server.
+  - **Backup only:** it isn't a sync method.
 - **Email backups (Decided):** an email with an encrypted backup file, at a frequency the user chooses: **weekly, monthly or quarterly**. There's no daily option, to keep sending volume reasonable. Probably a paid feature.
 - **Import and restore (Decided):** the app can import a backup file and decrypt it with the password, so users can check a backup works before they need it.
-- *To confirm:* Standard Notes also offers backups to cloud storage (such as Dropbox, Google Drive and OneDrive) and automatic local backups from the desktop app, all importable to restore.
 - Backups contain encrypted data, so they're only as readable as the password allows.
 
 ## Sync
 
 - **Two ways to sync, one client (Decided).** The client encrypts everything before it leaves the device, so storage only holds ciphertext. Both options sit behind one sync interface in the client:
-  - **Bring your own storage:** the app syncs straight to storage the user controls (for example their own S3 bucket or a synced folder). No randomtask server is involved.
+  - **Bring your own storage:** the app syncs straight to storage the user controls (their own S3-compatible bucket). No randomtask server is involved.
   - **Hosted service:** a randomtask server handles accounts, sessions, two-factor authentication, quotas, billing, email backups and a hosted web app. It never sees passwords, keys or task contents.
 - **Each user has their own storage bucket (Decided).** Users' data never shares a bucket. In the hosted service the server creates a bucket per user and gives the app short-lived credentials limited to that bucket, so the app reads and writes its encrypted data directly. Cloud providers cap buckets per account, so very large numbers of users may need several cloud accounts.
 - **Sync can be switched on or off (Decided).** With it off, the app works purely locally.
@@ -102,4 +106,5 @@ No server yet. On first launch the user creates an account with an **email and p
 - **Where the cryptography runs.** In Rust, for performance, as decided for storage. A future web version would need the same code in the browser, for example compiled to WebAssembly.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
 - **Email backups.** Whether they're definitely a paid feature, and which email service sends them.
+- **Local backup snapshots.** How often they're taken, how long they're kept, and where the folder lives on iOS and Android.
 - **Accounts versus the roadmap.** In this design the encryption keys come from the account password, so encryption and accounts are built together rather than as separate stages.
