@@ -2,7 +2,7 @@
 
 A minimal, client-side encrypted todo app. It does todos and nothing else: no calendar, notes or timers. Tasks are organised with hierarchical tags.
 
-randomtask is at an early stage. Version 0.1 is only a desktop shell, and the todo features are being built test-first. The decisions behind it are in [docs/decisions.md](docs/decisions.md).
+randomtask is at an early stage. It keeps a simple task list, encrypted on your device under a local account password, and the rest of the todo features are being built test-first. The decisions behind it are in [docs/decisions.md](docs/decisions.md).
 
 ## Install
 
