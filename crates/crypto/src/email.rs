@@ -4,7 +4,7 @@
 /// Trims `email` and lower-cases it, or returns None if it isn't shaped like
 /// an address: one `@`, a name before it, and a domain with a dot inside it,
 /// with no spaces anywhere.
-pub(crate) fn normalise(email: &str) -> Option<String> {
+pub fn normalise_email(email: &str) -> Option<String> {
     let email = email.trim().to_lowercase();
     let (name, domain) = email.split_once('@')?;
     let valid = !name.is_empty()
