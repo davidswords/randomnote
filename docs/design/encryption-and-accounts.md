@@ -85,7 +85,7 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 - **Two ways to sync, one client (Decided).** The client encrypts everything before it leaves the device, so storage only holds ciphertext. Both options sit behind one sync interface in the client:
   - **Bring your own storage:** the app syncs straight to storage the user controls (their own S3-compatible bucket). No randomtask server is involved.
   - **Hosted service:** a randomtask server handles accounts, sessions, two-factor authentication, quotas, billing, email backups and a hosted web app. It never sees passwords, keys or task contents.
-- **Each user has their own storage bucket (Decided).** Users' data never shares a bucket. In the hosted service the server creates a bucket per user and gives the app short-lived credentials limited to that bucket, so the app reads and writes its encrypted data directly. Cloud providers cap buckets per account, so very large numbers of users may need several cloud accounts.
+- **Each user has their own storage bucket (Decided).** Users' data never shares a bucket. In the hosted service the server creates a bucket per user and reads and writes the user's encrypted records there for the app; only the server holds the storage credentials. Cloud providers cap buckets per account, so very large numbers of users may need several cloud accounts.
 - **Sync can be switched on or off (Decided).** With it off, the app works purely locally.
 - **Uploads can be size-limited (Decided).** For example a per-account quota, enforced by the server and shown by the app.
 - **Where data is stored is flexible (Decided).** randomtask is open source, so people can bring their own storage or self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
@@ -109,7 +109,6 @@ Still no server. The app opens straight into the task list, storing tasks unencr
 
 ## Open questions
 
-- **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.
 - **Where the cryptography runs.** In Rust on the desktop, and the same Rust compiled to WebAssembly in the browser.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
 - **Email backups.** Whether they're definitely a paid feature, and which email service sends them.

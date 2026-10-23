@@ -84,6 +84,8 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice (no daily option), probably a paid feature. The app can **import a backup** to check it restores.
 - **Sync goes through the randomtask server,** which alone holds the S3 credentials and writes each user's encrypted records to that user's own bucket. Bringing your own bucket comes later, by self-hosting the open-source server.
 - **Each user has their own storage bucket;** users' data never shares one.
+- **The server is our own, written in Rust,** following Standard Notes' registration and sign-in protocol rather than adapting its server, which is TypeScript and keeps every user's records in one database.
+- **The domain is randomtask.ch.** Where the server is hosted is decided before sync, the first stage that needs it live.
 - **Encryption at rest:** once an email and password are added, records are always stored encrypted on the device and decrypted only in memory. Before that, tasks are stored unencrypted, as in Standard Notes, and the app says so. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
 - **An account is an email and a password,** never a username, so we can always reach the user. The email is stored trimmed and in lower case, because the keys are derived from it.
@@ -107,7 +109,7 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Where can archived and expired tasks be seen, and can they be restored?
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
-- The server: where it's hosted, its domain, the payment provider and pricing, and whether emails are verified.
+- The server: where it's hosted, and whether emails are verified.
 - Browser storage for the web version: SQLite compiled to WebAssembly, or IndexedDB.
 - Pricing details: the price (around $3 a month or $30 a year was suggested), the length of the free trial, and which merchant of record.
 - Whether the repository stays public.
