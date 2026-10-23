@@ -49,6 +49,9 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **IDs are UUID v7,** generated on the device. They sort by creation time. Occurrences of recurring tasks are the exception (see the design note).
 - **Storage and sync encrypt each record separately,** as Standard Notes and Notesnook do. Sync sends only changed records, conflicts are resolved per record, and the server only sees ciphertext.
 - **Storage sits behind interfaces in `core`,** with an in-memory version for unit tests and real adapters in the apps.
+- **Accounts and encryption behave like Standard Notes** (protocol 004): Argon2id keys from the password, per-record XChaCha20-Poly1305 encryption, an optional local passcode. See [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
+- **Email backups** are wanted.
+- **Sync can be switched off, uploads can be size-limited, and storage is flexible,** with S3-compatible storage as the likely default and self-hosting possible.
 - **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.
 
 ## Open questions
@@ -59,8 +62,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - Can a child tag be unarchived while its parent stays archived?
 - What happens to a tag's tasks when the tag is deleted?
 - Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
-- Encryption: the algorithm, key derivation, what is encrypted, and what happens if the password is lost.
-- Sync: where the encrypted data is stored, and how conflicting changes to the same record from two devices are merged.
-- Accounts: username and password, two-factor authentication, and recovery keys.
+- Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
+- Sync conflicts: how conflicting changes to the same record from two devices are merged.
 - Web version: possibly later, with a browser storage adapter (SQLite compiled to WebAssembly, or IndexedDB) behind the same `TaskRepository`. Encryption code would then need to run in the browser too.
 - Business model and licence: whether randomnote stays open source with paid sync, and whether the repository stays public.
