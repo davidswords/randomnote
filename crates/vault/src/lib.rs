@@ -73,7 +73,7 @@ impl Vault {
             })
             .map_err(storage)?;
         self.keys = Some(Keys::from(vec![items_key]));
-        Ok(())
+        self.encrypt_unencrypted_tasks()
     }
 
     /// Unlocks the vault. A wrong password leaves it locked.
@@ -96,7 +96,7 @@ impl Vault {
             })
             .collect::<Result<Vec<_>, _>>()?;
         self.keys = Some(Keys::from(items_keys));
-        Ok(())
+        self.encrypt_unencrypted_tasks()
     }
 
     /// Forgets the keys, so tasks can't be read until the next unlock.
@@ -104,9 +104,12 @@ impl Vault {
         self.keys = None;
     }
 
-    /// Saves a task, replacing any task with the same ID.
+    /// Saves a task, replacing any task with the same ID. Without an account
+    /// the task is stored unencrypted, as nothing can encrypt it yet.
     pub fn save_task(&self, task: &Task) -> Result<(), VaultError> {
-        let keys = self.keys()?;
+        let Access::Encrypted(keys) = self.access()? else {
+            return self.store.save_unencrypted_task(task).map_err(storage);
+        };
         let content = serde_json::to_string(&TaskContent {
             title: task.title.clone(),
         })
@@ -123,13 +126,17 @@ impl Vault {
     }
 
     pub fn find_task(&self, id: &str) -> Result<Option<Task>, VaultError> {
-        let keys = self.keys()?;
+        let Access::Encrypted(keys) = self.access()? else {
+            return self.store.find_unencrypted_task(id).map_err(storage);
+        };
         let item = self.store.find_item(id).map_err(storage)?;
         item.map(|item| keys.decrypt_task(item)).transpose()
     }
 
     pub fn list_tasks(&self) -> Result<Vec<Task>, VaultError> {
-        let keys = self.keys()?;
+        let Access::Encrypted(keys) = self.access()? else {
+            return self.store.unencrypted_tasks().map_err(storage);
+        };
         let items = self.store.items().map_err(storage)?;
         items
             .into_iter()
@@ -137,9 +144,32 @@ impl Vault {
             .collect()
     }
 
-    fn keys(&self) -> Result<&Keys, VaultError> {
-        self.keys.as_ref().ok_or(VaultError::Locked)
+    /// How tasks are reached: encrypted once unlocked, unencrypted while there
+    /// is no account, and not at all while an account is locked.
+    fn access(&self) -> Result<Access<'_>, VaultError> {
+        match &self.keys {
+            Some(keys) => Ok(Access::Encrypted(keys)),
+            None if self.has_account()? => Err(VaultError::Locked),
+            None => Ok(Access::Unencrypted),
+        }
     }
+
+    /// Encrypts any tasks saved before the account existed, then wipes the
+    /// unencrypted copies. Run on unlocking too, in case an earlier run was
+    /// interrupted.
+    fn encrypt_unencrypted_tasks(&self) -> Result<(), VaultError> {
+        let tasks = self.store.unencrypted_tasks().map_err(storage)?;
+        if tasks.is_empty() {
+            return Ok(());
+        }
+        tasks.iter().try_for_each(|task| self.save_task(task))?;
+        self.store.wipe_unencrypted_tasks().map_err(storage)
+    }
+}
+
+enum Access<'a> {
+    Unencrypted,
+    Encrypted(&'a Keys),
 }
 
 impl Keys {
