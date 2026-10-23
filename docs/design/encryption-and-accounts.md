@@ -53,6 +53,18 @@ Three layers of keys:
 - An optional **passcode** locks the app on the device. It goes through the same key derivation, with a random ID in place of the email, and the resulting key encrypts the stored master key. Nothing that could verify the passcode is stored; it's correct when decryption succeeds.
 - Without a passcode, the master key is kept in the **operating system's keychain** (the macOS Keychain on a Mac).
 
+## Encryption at rest (Decided)
+
+A seized or stolen device, or a drive removed from it, must yield only ciphertext. This is stronger than Standard Notes' default, which keeps the master key in the operating system's keychain unless a local passcode is set.
+
+- **Records are always stored encrypted** in the local database, whether or not a passcode is set. They are decrypted only in memory, in Rust, and only the results cross into the web view.
+- **The key is never stored unprotected on disk.** By default the password unlocks the app at every launch, so the key exists only in memory while the app is open.
+- **Staying signed in is opt-in:** "stay signed in on this device" stores the key in the operating system's keychain (the macOS Keychain), trading some protection for convenience.
+- **The app can be locked** on demand and after a period of inactivity, which clears the key from memory.
+- **No plaintext side copies:** search indexes, caches, logs, crash reports and temporary files must not contain task contents.
+- **Tested end to end:** after adding tasks, a test scans the files on disk and checks no task title appears in plain text.
+- **Limits:** this protects a device that is off or locked. While the app is unlocked, data is in memory. Operating-system full-disk encryption (such as FileVault) also covers swap and hibernation files, and is recommended alongside.
+
 ## Two-factor authentication *(to confirm)*
 
 Time-based one-time codes (TOTP) from an authenticator app, with a one-off recovery code for when the authenticator is lost.
@@ -83,7 +95,6 @@ No server yet. On first launch the user creates an account with a **username and
 
 - **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.
 - **Using the app without an account.** Standard Notes works offline without an account. Is local data encrypted then (only with a passcode, or always)?
-- **Encrypting local storage.** Are records stored encrypted in the local SQLite database and decrypted on read, or only encrypted for sync and backups?
 - **Where the cryptography runs.** In Rust, for performance, as decided for storage. A future web version would need the same code in the browser, for example compiled to WebAssembly.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
 - **Email backups.** Whether they're definitely a paid feature, and which email service sends them.

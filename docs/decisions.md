@@ -53,6 +53,7 @@ Product and technical decisions for randomnote. Add to this file when a decision
 - **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice (no daily option), probably a paid feature. The app can **import a backup** to check it restores.
 - **Sync has two modes behind one client interface:** bring your own storage (no randomnote server) and a hosted service with a randomnote server.
 - **Each user has their own storage bucket;** users' data never shares one.
+- **Encryption at rest:** records are always stored encrypted on the device and decrypted only in memory. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
 - **The first accounts proof of concept has no server:** a local username and password that encrypt the data on the device.
 - **Sync can be switched off, uploads can be size-limited, and storage is flexible,** with S3-compatible storage as the likely default.
