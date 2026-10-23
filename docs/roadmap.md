@@ -8,7 +8,7 @@ The order the core of randomtask is built in. Each stage is built test-first and
 4. **Sync up.** Send the encrypted data to a sync location.
 5. **Sync down.** Pull the encrypted data onto another device and merge it.
 6. **Accounts.** Email and password, two-factor authentication and recovery, as in Standard Notes.
-7. **Backups.** Email backups, and possibly cloud and local backups.
+7. **Backups.** A local backup folder (on by default) with restore, then email backups.
 
 The design for stages 3 to 7 is in [design/encryption-and-accounts.md](design/encryption-and-accounts.md). Following Standard Notes, the encryption keys come from the account password, so encryption and accounts may be built together.
 
