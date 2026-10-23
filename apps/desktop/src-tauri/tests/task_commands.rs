@@ -1,8 +1,8 @@
 //! The task commands called through Tauri's real IPC handling, against a real
 //! in-memory SQLite store. The messages match what TauriTaskRepository sends.
 
-use randomnote_lib::{TaskState, with_task_commands};
-use randomnote_store::TaskStore;
+use randomtask_lib::{TaskState, with_task_commands};
+use randomtask_store::TaskStore;
 use serde_json::{Value, json};
 use tauri::test::{
     INVOKE_KEY, MockRuntime, get_ipc_response, mock_builder, mock_context, noop_assets,

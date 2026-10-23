@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    randomnote_lib::run()
+    randomtask_lib::run()
 }

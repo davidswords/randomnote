@@ -1,8 +1,8 @@
 [package]
-name = "randomnote-crypto"
+name = "randomtask-crypto"
 version = "0.1.0"
 edition = "2024"
-description = "Encryption for randomnote, following the Standard Notes 004 protocol"
+description = "Encryption for randomtask, following the Standard Notes 004 protocol"
 license = "GPL-3.0-only"
 
 [dependencies]

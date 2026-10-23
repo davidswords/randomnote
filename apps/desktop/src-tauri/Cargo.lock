@@ -2424,10 +2424,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
-name = "randomnote"
-version = "0.2.0"
+name = "randomtask"
+version = "0.2.1"
 dependencies = [
- "randomnote-store",
+ "randomtask-store",
  "rusqlite",
  "serde_json",
  "tauri",
@@ -2436,7 +2436,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "randomnote-store"
+name = "randomtask-store"
 version = "0.1.0"
 dependencies = [
  "rusqlite",

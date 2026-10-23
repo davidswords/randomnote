@@ -1,4 +1,4 @@
-//! Encryption for randomnote, following the Standard Notes 004 protocol.
+//! Encryption for randomtask, following the Standard Notes 004 protocol.
 
 mod error;
 mod hierarchy;

@@ -1,8 +1,8 @@
 [package]
-name = "randomnote-store"
+name = "randomtask-store"
 version = "0.1.0"
 edition = "2024"
-description = "SQLite storage for randomnote"
+description = "SQLite storage for randomtask"
 license = "GPL-3.0-only"
 
 [dependencies]

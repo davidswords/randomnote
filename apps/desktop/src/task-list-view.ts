@@ -4,7 +4,7 @@ import {
   InvalidTaskTitleError,
   type Task,
   type TaskRepository,
-} from "@randomnote/core";
+} from "@randomtask/core";
 
 const EMPTY_TITLE_MESSAGE = "A task needs a title.";
 const SAVE_FAILED_MESSAGE = "Couldn't save the task. Please try again.";

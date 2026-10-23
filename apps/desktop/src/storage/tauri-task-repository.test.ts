@@ -1,4 +1,4 @@
-import { taskRepositoryContract } from "@randomnote/core/testing";
+import { taskRepositoryContract } from "@randomtask/core/testing";
 import { describe, expect, it } from "vitest";
 import { fakeTaskCommands } from "./fake-task-commands";
 import { TauriTaskRepository } from "./tauri-task-repository";

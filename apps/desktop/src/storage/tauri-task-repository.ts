@@ -1,4 +1,4 @@
-import type { Task, TaskRepository } from "@randomnote/core";
+import type { Task, TaskRepository } from "@randomtask/core";
 
 /** The shape of Tauri's invoke, so tests can pass a fake. */
 export type Invoke = <T>(

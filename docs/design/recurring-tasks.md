@@ -1,6 +1,6 @@
 # Recurring tasks
 
-How randomnote models tasks that repeat. Decided points are marked **Decided**. Everything else is open and listed at the end.
+How randomtask models tasks that repeat. Decided points are marked **Decided**. Everything else is open and listed at the end.
 
 ## Guiding principle (Decided)
 

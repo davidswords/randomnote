@@ -1,6 +1,6 @@
 [package]
-name = "randomnote"
-version = "0.2.0"
+name = "randomtask"
+version = "0.2.1"
 description = "A simple, client-side encrypted todo app"
 authors = ["David Swords"]
 license = "GPL-3.0-only"
@@ -8,14 +8,14 @@ edition = "2024"
 
 [lib]
 # The `_lib` suffix keeps the lib name distinct from the bin name (cargo#8519).
-name = "randomnote_lib"
+name = "randomtask_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-randomnote-store = { version = "0.1.0", path = "../../../crates/store" }
+randomtask-store = { version = "0.1.0", path = "../../../crates/store" }
 tauri = { version = "2", features = [] }
 
 [dev-dependencies]

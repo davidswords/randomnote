@@ -7,7 +7,7 @@ use std::path::Path;
 
 pub use app::run;
 pub use commands::TaskState;
-use randomnote_store::TaskStore;
+use randomtask_store::TaskStore;
 use tauri::{Builder, Runtime};
 
 /// Registers the commands the web view uses to reach the task store.

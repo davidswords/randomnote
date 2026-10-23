@@ -1,6 +1,6 @@
 # Encryption, accounts, sync and backups
 
-How randomnote protects data, signs people in, syncs and backs up. Decided points are marked **Decided**. Everything else is open and listed at the end.
+How randomtask protects data, signs people in, syncs and backs up. Decided points are marked **Decided**. Everything else is open and listed at the end.
 
 ## Guiding principle (Decided)
 
@@ -79,12 +79,12 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 ## Sync
 
 - **Two ways to sync, one client (Decided).** The client encrypts everything before it leaves the device, so storage only holds ciphertext. Both options sit behind one sync interface in the client:
-  - **Bring your own storage:** the app syncs straight to storage the user controls (for example their own S3 bucket or a synced folder). No randomnote server is involved.
-  - **Hosted service:** a randomnote server handles accounts, sessions, two-factor authentication, quotas, billing, email backups and a hosted web app. It never sees passwords, keys or task contents.
+  - **Bring your own storage:** the app syncs straight to storage the user controls (for example their own S3 bucket or a synced folder). No randomtask server is involved.
+  - **Hosted service:** a randomtask server handles accounts, sessions, two-factor authentication, quotas, billing, email backups and a hosted web app. It never sees passwords, keys or task contents.
 - **Each user has their own storage bucket (Decided).** Users' data never shares a bucket. In the hosted service the server creates a bucket per user and gives the app short-lived credentials limited to that bucket, so the app reads and writes its encrypted data directly. Cloud providers cap buckets per account, so very large numbers of users may need several cloud accounts.
 - **Sync can be switched on or off (Decided).** With it off, the app works purely locally.
 - **Uploads can be size-limited (Decided).** For example a per-account quota, enforced by the server and shown by the app.
-- **Where data is stored is flexible (Decided).** randomnote is open source, so people can bring their own storage or self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
+- **Where data is stored is flexible (Decided).** randomtask is open source, so people can bring their own storage or self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
 - *To confirm:* Standard Notes' server is open source and self-hostable, storing records in a database and files in S3 or on disk.
 
 ## First proof of concept (Decided)

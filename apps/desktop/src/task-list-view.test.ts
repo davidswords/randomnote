@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { InMemoryTaskRepository } from "@randomnote/core";
+import { InMemoryTaskRepository } from "@randomtask/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { showTaskList } from "./task-list-view";
 

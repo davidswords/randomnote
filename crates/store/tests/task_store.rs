@@ -1,7 +1,7 @@
 //! TaskStore against a real SQLite database. Mirrors the TaskRepository
 //! contract in packages/core.
 
-use randomnote_store::{Task, TaskStore};
+use randomtask_store::{Task, TaskStore};
 
 fn a_task(id: &str, title: &str) -> Task {
     Task {
@@ -13,7 +13,7 @@ fn a_task(id: &str, title: &str) -> Task {
 #[test]
 fn keeps_tasks_after_the_database_file_is_closed_and_reopened() {
     let directory = tempfile::tempdir().unwrap();
-    let path = directory.path().join("randomnote.db");
+    let path = directory.path().join("randomtask.db");
     let task = a_task("task-1", "Buy milk");
 
     {
@@ -109,7 +109,7 @@ fn reports_an_error_when_the_file_is_not_a_database() {
 #[test]
 fn reports_an_error_when_saving_fails() {
     let directory = tempfile::tempdir().unwrap();
-    let path = directory.path().join("randomnote.db");
+    let path = directory.path().join("randomtask.db");
     let store = TaskStore::open(&path).unwrap();
     rusqlite::Connection::open(&path)
         .unwrap()

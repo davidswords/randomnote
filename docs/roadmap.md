@@ -1,6 +1,6 @@
 # Roadmap
 
-The order the core of randomnote is built in. Each stage is built test-first and verified before the next one starts. Open questions for each stage are in [decisions.md](decisions.md).
+The order the core of randomtask is built in. Each stage is built test-first and verified before the next one starts. Open questions for each stage are in [decisions.md](decisions.md).
 
 1. **Task entity.** A task with a title. *Done.*
 2. **Local database.** Save and load tasks on the device, with a minimal task list and an end-to-end test. *Done in 0.2.0.*
