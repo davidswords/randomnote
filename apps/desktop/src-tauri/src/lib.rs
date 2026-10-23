@@ -35,11 +35,21 @@ pub fn open_vault(data_directory: &Path) -> Result<Vault, Box<dyn Error>> {
     Ok(Vault::new(store))
 }
 
-/// Deletes the data randomnote 0.2.0 kept in plain text, in the directory
-/// beside `data_directory` named after randomnote's bundle ID. Does nothing if
-/// it isn't there.
-pub fn remove_randomnote_data(data_directory: &Path) -> io::Result<()> {
-    match fs::remove_dir_all(data_directory.with_file_name(RANDOMNOTE_BUNDLE_ID)) {
+/// Deletes the tasks that versions before 0.3.0 kept in plain text: randomnote
+/// 0.2.0's data directory, beside `data_directory` and named after its bundle
+/// ID, and randomtask 0.2.1's `tasks.db` inside `data_directory`. Does nothing
+/// for whichever isn't there.
+pub fn remove_unencrypted_data(data_directory: &Path) -> io::Result<()> {
+    // Each is attempted even if the other fails.
+    let randomnote = ignore_missing(fs::remove_dir_all(
+        data_directory.with_file_name(RANDOMNOTE_BUNDLE_ID),
+    ));
+    let tasks_file = ignore_missing(fs::remove_file(data_directory.join("tasks.db")));
+    randomnote.and(tasks_file)
+}
+
+fn ignore_missing(result: io::Result<()>) -> io::Result<()> {
+    match result {
         Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
         result => result,
     }

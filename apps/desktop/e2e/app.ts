@@ -54,6 +54,11 @@ export class AppDriver {
     await app.deleteSession();
   }
 
+  /** A path inside the data directory, for setting up files before a launch. */
+  dataPath(...segments: string[]): string {
+    return join(this.dataDirectory, ...segments);
+  }
+
   /** The contents of every file the app has written to its data directory. */
   dataFiles(): Buffer[] {
     return readdirSync(this.dataDirectory, { recursive: true, withFileTypes: true })
