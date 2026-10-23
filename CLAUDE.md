@@ -29,7 +29,7 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
 - `crates/store`: SQLite storage in Rust (rusqlite, bundled SQLite). No Tauri dependency, so it builds and tests anywhere.
 - `crates/crypto`: encryption following the Standard Notes 004 protocol (Argon2id key derivation, XChaCha20-Poly1305 record encryption, and the items-key hierarchy). Test vectors come from independent reference implementations, never from this crate.
 - `crates/vault`: the account and its encrypted tasks. It derives keys from the password with `crates/crypto`, stores only ciphertext with `crates/store`, and holds keys only in memory while unlocked.
-- `crates/server`: the randomtask server (axum, SQLite). It registers accounts and starts sessions at the paths and in the formats the Standard Notes client uses. It never sees passwords or keys, only the server password, which it stores as a bcrypt hash.
+- `crates/server`: the randomtask server (axum, SQLite). It registers accounts and signs them in at the paths and in the formats the Standard Notes client uses. It never sees passwords or keys, only the server password, which it stores as a bcrypt hash.
 
 ## Commands
 
@@ -42,7 +42,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 - `npm run typecheck`: typecheck all workspaces.
 - `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check` in `crates/store`, `crates/crypto`, `crates/vault`, `crates/server` or `apps/desktop/src-tauri`: test and lint the Rust code. On Linux, `src-tauri` needs Tauri's system packages (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `librsvg2-dev`, `libayatana-appindicator3-dev`).
 - `npm run test:e2e -w @randomtask/desktop`: run the end-to-end tests against a debug build (`npm run tauri -w @randomtask/desktop -- build --debug --no-bundle`). On Linux they need `webkit2gtk-driver`, `tauri-driver` (`cargo install tauri-driver --locked`) and a display; in a headless shell, prefix with `xvfb-run -a`.
-- `cargo run` in `crates/server`: run the server on `127.0.0.1:8080`. `RANDOMTASK_ADDRESS` and `RANDOMTASK_DATABASE` (the SQLite file) override the defaults.
+- `cargo run` in `crates/server`: run the server on `127.0.0.1:8080`. `RANDOMTASK_PSEUDO_KEY` must be set to a long random secret; `RANDOMTASK_ADDRESS` and `RANDOMTASK_DATABASE` (the SQLite file) override the defaults.
 - `npm run dev`: run the desktop app. This needs Rust and the Tauri prerequisites for your OS.
 
 ## CI and releases

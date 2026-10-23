@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 use crate::error::ServerError;
 
-const VERSION: &str = "004";
+pub(crate) const VERSION: &str = "004";
 
 /// A registration as the Standard Notes client sends it. `password` is the
 /// server password, never the user's password.

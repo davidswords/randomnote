@@ -69,6 +69,8 @@ Product and technical decisions for randomtask. Add to this file when a decision
 
 - **Desktop:** macOS, Linux and Windows. **Mobile** comes later.
 - **The first release target is macOS on Apple Silicon, installed with Homebrew.** The app is ad-hoc signed and not notarized for now, so Gatekeeper warns on first launch.
+- **`randomtask` in a terminal opens the app,** as clicking it does. The Homebrew cask installs the command.
+- **A quick-add command comes after "stay signed in":** `randomtask "a task"` adds a task from the terminal, unlocking with the key in the keychain.
 
 ## Technology
 

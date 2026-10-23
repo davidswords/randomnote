@@ -113,9 +113,11 @@ Our own server in Rust, in `crates/server`, at the paths and in the formats the 
 
 - **Registering:** `POST /v1/users` with the email, the server password, the seed (`pw_nonce`), the version (`004`), and optionally `origination` and `created`. The email is stored trimmed and in lower case. An email that's already registered is refused, as in Standard Notes.
 - **The server password** is stored as a bcrypt hash with a cost of 11, as in Standard Notes.
-- **Sessions:** registering starts a session. Its tokens are `1:<session uuid>:<token>`, with 48 random bytes per token, and only their SHA-256 hashes are stored. *To confirm:* access tokens last 60 days and the session can be refreshed for a year; these are recalled from Standard Notes' sample configuration, not read from it.
+- **Sessions:** registering starts a session. Its tokens are `1:<session uuid>:<token>`, with 48 random bytes per token, and only their SHA-256 hashes are stored. Access tokens last 60 days and the session can be refreshed for a year, the values in Standard Notes' sample configuration.
 - **Errors** are JSON, `{"error": {"message": "..."}}`, with messages written for the user. A storage failure doesn't reveal its detail.
-- **Next:** signing in (`POST /v2/login-params` and `POST /v2/login`, with PKCE and made-up key parameters for unknown emails, so they can't be discovered), refreshing and signing out, then the app using the server.
+- **Key parameters:** `POST /v2/login-params` with the email and a PKCE code challenge gives the identifier, seed and version. The challenge is stored for an hour, as in Standard Notes. An email with no account gets made-up parameters, the same every time (the seed is the SHA-256 of the email and a server secret), so a stranger can't tell whether an account exists. Unlike Standard Notes, the made-up version is always `004`, the only one we support.
+- **Signing in:** `POST /v2/login` with the email, the server password and the code verifier. The challenge must be base64url (no padding) of the hex SHA-256 of the verifier, as Standard Notes' client makes it, and each challenge works once, even if the password was wrong. A wrong email, password or verifier all get the same answer, "Invalid email or password", with a 401. Signing in starts a new session.
+- **Next:** locking an account after 6 failed sign-ins for an hour (Standard Notes' sample configuration), refreshing and signing out, then the app using the server.
 
 ## Open questions
 
