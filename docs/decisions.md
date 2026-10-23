@@ -71,12 +71,19 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Accounts and encryption behave like Standard Notes** (protocol 004): Argon2id keys from the password, per-record XChaCha20-Poly1305 encryption, an optional local passcode. See [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - **A local backup folder, on by default:** an encrypted copy of the account in `~/randomtask/<email>/` (or a location the user chooses), laid out as in S3, as a mirror plus periodic snapshots. A fresh install can restore from it with the password alone. It's a backup, not a sync method.
 - **Email backups:** encrypted, weekly, monthly or quarterly at the user's choice (no daily option), probably a paid feature. The app can **import a backup** to check it restores.
-- **Sync has two modes behind one client interface:** bring your own storage (no randomtask server) and a hosted service with a randomtask server.
+- **Sync goes through the randomtask server,** which alone holds the S3 credentials and writes each user's encrypted records to that user's own bucket. Bringing your own bucket comes later, by self-hosting the open-source server.
 - **Each user has their own storage bucket;** users' data never shares one.
-- **Encryption at rest:** records are always stored encrypted on the device and decrypted only in memory. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
+- **Encryption at rest:** once an email and password are added, records are always stored encrypted on the device and decrypted only in memory. Before that, tasks are stored unencrypted, as in Standard Notes, and the app says so. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
 - **An account is an email and a password,** never a username, so we can always reach the user. The email is stored trimmed and in lower case, because the keys are derived from it.
-- **The first accounts proof of concept has no server:** the email and password encrypt the data on the device. The password is typed twice at sign-up and is at least 12 characters. Unencrypted tasks from versions before 0.3.0 are deleted on launch, not migrated.
+- **Three tiers, as in Standard Notes:**
+  - **No account:** the app works the moment it opens, empty and ready to use, with no sign-up.
+  - **A free account** (email and password) is registered with the randomtask server and encrypts the device's data. The same account works on every device and in the browser.
+  - **A subscription** turns on sync.
+- **The account menu sits at the bottom of the sidebar,** as in Standard Notes, with *Create free account*, *Sign in*, *Import*, *Help* and the version. A dismissible notice says when data isn't backed up, with a *Sign up to sync* button.
+- **One implementation for desktop and web:** the same frontend and the same Rust core, run by Tauri on the desktop and compiled to WebAssembly in the browser. The web version is the site people reach.
+- **Passwords** are typed twice at sign-up and are at least 12 characters.
+- **Unencrypted tasks from versions before 0.3.0 are deleted on launch,** not migrated.
 - **Sync can be switched off, uploads can be size-limited, and storage is flexible,** with S3-compatible storage as the likely default.
 - **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.
 
@@ -94,5 +101,6 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Where can archived and expired tasks be seen, and can they be restored?
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
-- Web version: possibly later, with a browser storage adapter (SQLite compiled to WebAssembly, or IndexedDB) behind the same `TaskRepository`. Encryption code would then need to run in the browser too.
+- The server: where it's hosted, its domain, the payment provider and pricing, and whether emails are verified.
+- Browser storage for the web version: SQLite compiled to WebAssembly, or IndexedDB.
 - Business model and licence: whether randomtask stays open source with paid sync, and whether the repository stays public.
