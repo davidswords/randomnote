@@ -52,15 +52,20 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 
 ## Backups
 
-- **Email backups (Decided):** a daily email with an encrypted backup file. Probably a paid feature.
+- **Email backups (Decided):** an email with an encrypted backup file, at a frequency the user chooses: **weekly, monthly or quarterly**. Probably a paid feature.
+- **Import and restore (Decided):** the app can import a backup file and decrypt it with the password, so users can check a backup works before they need it.
 - *To confirm:* Standard Notes also offers backups to cloud storage (such as Dropbox, Google Drive and OneDrive) and automatic local backups from the desktop app, all importable to restore.
 - Backups contain encrypted data, so they're only as readable as the password allows.
 
 ## Sync
 
+- **Two ways to sync, one client (Decided).** The client encrypts everything before it leaves the device, so storage only holds ciphertext. Both options sit behind one sync interface in the client:
+  - **Bring your own storage:** the app syncs straight to storage the user controls (for example their own S3 bucket or a synced folder). No randomnote server is involved.
+  - **Hosted service:** a randomnote server handles accounts, sessions, two-factor authentication, quotas, billing, email backups and a hosted web app. It never sees passwords, keys or task contents.
+- **Each user has their own storage bucket (Decided).** Users' data never shares a bucket. In the hosted service the server creates a bucket per user and gives the app short-lived credentials limited to that bucket, so the app reads and writes its encrypted data directly. Cloud providers cap buckets per account, so very large numbers of users may need several cloud accounts.
 - **Sync can be switched on or off (Decided).** With it off, the app works purely locally.
 - **Uploads can be size-limited (Decided).** For example a per-account quota, enforced by the server and shown by the app.
-- **Where data is stored is flexible (Decided).** randomnote is open source, so people can self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
+- **Where data is stored is flexible (Decided).** randomnote is open source, so people can bring their own storage or self-host. The likely default is S3-compatible object storage (Amazon S3, Cloudflare R2, MinIO and others), behind an interface so other storage can plug in.
 - *To confirm:* Standard Notes' server is open source and self-hostable, storing records in a database and files in S3 or on disk.
 
 ## First proof of concept (Decided)
@@ -70,10 +75,10 @@ No server yet. On first launch the user creates an account with a **username and
 ## Open questions
 
 - **Recovery.** It must work like Standard Notes. To check: Standard Notes is understood to have no way to recover data after a forgotten password, with recovery codes only for lost two-factor devices. Is that the intended behaviour, or a recovery key that can unlock the data?
-- **The server.** randomnote needs a server for accounts, sync and email backups. Write our own, or adapt Standard Notes' open source server? Its server stores generic encrypted records, so it might fit.
+- **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.
 - **Using the app without an account.** Standard Notes works offline without an account. Is local data encrypted then (only with a passcode, or always)?
 - **Encrypting local storage.** Are records stored encrypted in the local SQLite database and decrypted on read, or only encrypted for sync and backups?
 - **Where the cryptography runs.** In Rust, for performance, as decided for storage. A future web version would need the same code in the browser, for example compiled to WebAssembly.
 - **Size limits.** What the limit is, whether it differs by plan, and what happens when it's reached.
-- **Email backups.** Whether they're definitely a paid feature, and which email service sends them.
+- **Email backups.** Whether they're definitely a paid feature, which email service sends them, and whether a daily option is offered too.
 - **Accounts versus the roadmap.** In this design the encryption keys come from the account password, so encryption and accounts are built together rather than as separate stages.
