@@ -1,6 +1,6 @@
 //! EncryptedStore against a real SQLite database.
 
-use randomtask_store::{Account, EncryptedStore, StoredItem, StoredItemsKey, Task, TaskStore};
+use randomtask_store::{Account, EncryptedStore, StoredItem, StoredItemsKey};
 
 fn an_account() -> Account {
     Account {
@@ -160,12 +160,12 @@ fn deletes_unencrypted_tasks_from_version_0_2_and_leaves_no_trace_in_the_file() 
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("tasks.db");
     {
-        let legacy = TaskStore::open(&path).unwrap();
-        legacy
-            .save(&Task {
-                id: "task-1".to_owned(),
-                title: "Buy milk".to_owned(),
-            })
+        rusqlite::Connection::open(&path)
+            .unwrap()
+            .execute_batch(
+                "CREATE TABLE tasks (id TEXT PRIMARY KEY NOT NULL, title TEXT NOT NULL) STRICT;
+                 INSERT INTO tasks (id, title) VALUES ('task-1', 'Buy milk');",
+            )
             .unwrap();
     }
 
