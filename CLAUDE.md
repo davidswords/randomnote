@@ -25,6 +25,7 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
 - `packages/core`: domain logic and its tests.
 - `apps/desktop`: the Tauri 2 shell (`src-tauri`) and the Vite + TypeScript frontend (`src`).
 - `crates/store`: SQLite storage in Rust (rusqlite, bundled SQLite). No Tauri dependency, so it builds and tests anywhere.
+- `crates/crypto`: encryption following the Standard Notes 004 protocol (Argon2id key derivation so far). Test vectors come from independent reference implementations, never from this crate.
 
 ## Commands
 
@@ -34,13 +35,13 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 - `npm test`: run all tests.
 - `npm run test:unit` / `npm run test:integration`: run one kind on its own.
 - `npm run typecheck`: typecheck all workspaces.
-- `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check` in `crates/store` or `apps/desktop/src-tauri`: test and lint the Rust code. On Linux, `src-tauri` needs Tauri's system packages (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `librsvg2-dev`, `libayatana-appindicator3-dev`).
+- `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check` in `crates/store`, `crates/crypto` or `apps/desktop/src-tauri`: test and lint the Rust code. On Linux, `src-tauri` needs Tauri's system packages (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `librsvg2-dev`, `libayatana-appindicator3-dev`).
 - `npm run test:e2e -w @randomnote/desktop`: run the end-to-end tests against a debug build (`npm run tauri -w @randomnote/desktop -- build --debug --no-bundle`). On Linux they need `webkit2gtk-driver`, `tauri-driver` (`cargo install tauri-driver --locked`) and a display; in a headless shell, prefix with `xvfb-run -a`.
 - `npm run dev`: run the desktop app. This needs Rust and the Tauri prerequisites for your OS.
 
 ## CI and releases
 
-- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for `crates/store` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux.
+- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for `crates/store`, `crates/crypto` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux.
 - `.github/workflows/release.yml` builds the Apple Silicon `.dmg`. On a `v*` tag it publishes a GitHub release. The tag must match the version in `apps/desktop/package.json`.
 
 ## Releasing

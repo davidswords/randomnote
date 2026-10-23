@@ -91,3 +91,19 @@ jobs:
         run: npm run tauri -w @randomnote/desktop -- build --debug --no-bundle
       - name: Run end-to-end tests
         run: xvfb-run -a npm run test:e2e -w @randomnote/desktop
+
+  crypto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: crates/crypto
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - run: rustup component add rustfmt clippy
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
