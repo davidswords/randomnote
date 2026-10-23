@@ -1,0 +1,17 @@
+# Runs the randomtask server on this machine, for trying the app against it:
+#   docker compose up --build
+# It listens on http://127.0.0.1:8080, and keeps its database in the
+# server-data volume. `docker compose down -v` deletes the database.
+services:
+  server:
+    build:
+      context: crates
+      dockerfile: server/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - server-data:/data
+    restart: unless-stopped
+
+volumes:
+  server-data:

@@ -227,6 +227,36 @@ jobs:
       - name: Run tests, requiring 100% line coverage
         run: cargo llvm-cov --locked --fail-under-lines 100 --ignore-filename-regex '(^|/)(app|main)\.rs$'
 
+  server-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Start the server with Docker Compose
+        run: docker compose up --build --detach --wait
+
+      - name: Check it answers for key parameters
+        run: |
+          for attempt in $(seq 1 30); do
+            if body=$(curl --silent --fail --request POST http://127.0.0.1:8080/v2/login-params \
+                --header 'content-type: application/json' \
+                --data '{"email": "ci@example.com", "code_challenge": "test"}'); then
+              echo "$body"
+              grep -q '"version":"004"' <<<"$body"
+              exit 0
+            fi
+            sleep 1
+          done
+          docker compose logs
+          exit 1
+
+      - name: Stop the server
+        if: always()
+        run: docker compose down --volumes
+
   cross-platform:
     name: cross-platform (${{ matrix.name }})
     runs-on: ${{ matrix.os }}

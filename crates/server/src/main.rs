@@ -1,7 +1,7 @@
 //! Runs the server. Configured with environment variables:
 //! `RANDOMTASK_DATABASE` (the SQLite file), `RANDOMTASK_ADDRESS`, and
-//! `RANDOMTASK_PSEUDO_KEY`, a long random secret that made-up key parameters
-//! for unknown emails come from. It must stay the same across restarts.
+//! optionally `RANDOMTASK_PSEUDO_KEY`, the secret that made-up key parameters
+//! for unknown emails come from. Without it, the database keeps its own.
 
 use std::path::PathBuf;
 
@@ -12,7 +12,12 @@ async fn main() {
     let database = std::env::var("RANDOMTASK_DATABASE").unwrap_or("randomtask-server.db".into());
     let address = std::env::var("RANDOMTASK_ADDRESS").unwrap_or("127.0.0.1:8080".into());
     let database = Database::open(&PathBuf::from(database)).expect("the database opens");
-    let pseudo_key = std::env::var("RANDOMTASK_PSEUDO_KEY").expect("RANDOMTASK_PSEUDO_KEY is set");
+    let pseudo_key = match std::env::var("RANDOMTASK_PSEUDO_KEY") {
+        Ok(key) => key,
+        Err(_) => database
+            .pseudo_key()
+            .expect("the database has a pseudo key"),
+    };
     let accounts = Accounts::new(database, Box::new(SystemClock), pseudo_key);
     let listener = tokio::net::TcpListener::bind(&address)
         .await

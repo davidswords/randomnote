@@ -44,12 +44,12 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 - `npm run typecheck`: typecheck all workspaces.
 - `cargo test`, `cargo clippy --all-targets -- -D warnings` and `cargo fmt --check` in each crate under `crates/client`, in `crates/server` or in `apps/desktop/src-tauri`: test and lint the Rust code. On Linux, `src-tauri` needs Tauri's system packages (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `librsvg2-dev`, `libayatana-appindicator3-dev`).
 - `npm run test:e2e -w @randomtask/desktop`: run the end-to-end tests against a debug build (`npm run tauri -w @randomtask/desktop -- build --debug --no-bundle`). On Linux they need `webkit2gtk-driver`, `tauri-driver` (`cargo install tauri-driver --locked`) and a display; in a headless shell, prefix with `xvfb-run -a`.
-- `cargo run` in `crates/server`: run the server on `127.0.0.1:8080`. `RANDOMTASK_PSEUDO_KEY` must be set to a long random secret; `RANDOMTASK_ADDRESS` and `RANDOMTASK_DATABASE` (the SQLite file) override the defaults.
+- `docker compose up --build`: run the server in Docker on `127.0.0.1:8080`, with its database in a volume. `cargo run` in `crates/server` runs it without Docker. `RANDOMTASK_ADDRESS`, `RANDOMTASK_DATABASE` (the SQLite file) and `RANDOMTASK_PSEUDO_KEY` override the defaults; without the last, the database keeps its own secret for made-up key parameters.
 - `npm run dev`: run the desktop app. This needs Rust and the Tauri prerequisites for your OS.
 
 ## CI and releases
 
-- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for each crate under `crates/client`, `crates/server` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `cross-platform` job runs the tests of `crypto`, `store` and `vault` on Windows and macOS, and compiles them for iOS and Android, so platform-specific breakage is caught on every pull request.
+- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for each crate under `crates/client`, `crates/server` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `server-image` job starts the server with Docker Compose and checks it answers. Its `cross-platform` job runs the tests of `crypto`, `store` and `vault` on Windows and macOS, and compiles them for iOS and Android, so platform-specific breakage is caught on every pull request.
 - `.github/workflows/release.yml` builds the Apple Silicon `.dmg`. On a `v*` tag it publishes a GitHub release. The tag must match the version in `apps/desktop/package.json`.
 
 ## Releasing
