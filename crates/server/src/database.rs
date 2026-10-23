@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use rusqlite::{Connection, ErrorCode, params};
+use rusqlite::{Connection, ErrorCode, OptionalExtension, params};
 
 use crate::error::{ServerError, storage};
 use crate::registration::KeyParams;
@@ -28,10 +28,22 @@ const SCHEMA: &str = "
         refresh_expiration INTEGER NOT NULL,
         created_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS code_challenges (
+        challenge TEXT PRIMARY KEY,
+        user_uuid TEXT NOT NULL REFERENCES users (uuid),
+        expires_at INTEGER NOT NULL
+    );
 ";
 
 pub struct Database {
     connection: Connection,
+}
+
+/// A stored user, found by email.
+pub(crate) struct StoredUser {
+    pub uuid: String,
+    pub encrypted_password: String,
+    pub key_params: KeyParams,
 }
 
 /// A user about to be stored. The password is already a bcrypt hash.
@@ -78,22 +90,101 @@ impl Database {
                 Some(ErrorCode::ConstraintViolation) => ServerError::EmailTaken,
                 _ => storage(error),
             })?;
-        transaction
-            .execute(
-                "INSERT INTO sessions (uuid, user_uuid, access_token_hash, refresh_token_hash,
-                    access_expiration, refresh_expiration, created_at)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                params![
-                    session.uuid,
-                    user.uuid,
-                    hash(&session.access_token),
-                    hash(&session.refresh_token),
-                    session.access_expiration,
-                    session.refresh_expiration,
-                    now,
-                ],
-            )
-            .map_err(storage)?;
+        insert_session(&transaction, user.uuid, session, now)?;
         transaction.commit().map_err(storage)
     }
+
+    pub(crate) fn insert_session(
+        &self,
+        user_uuid: &str,
+        session: &NewSession,
+        now: i64,
+    ) -> Result<(), ServerError> {
+        insert_session(&self.connection, user_uuid, session, now)
+    }
+
+    pub(crate) fn find_user(&self, email: &str) -> Result<Option<StoredUser>, ServerError> {
+        self.connection
+            .query_row(
+                "SELECT uuid, encrypted_password, pw_nonce, version, origination, created
+                 FROM users WHERE email = ?1",
+                [email],
+                |row| {
+                    Ok(StoredUser {
+                        uuid: row.get(0)?,
+                        encrypted_password: row.get(1)?,
+                        key_params: KeyParams {
+                            identifier: email.to_owned(),
+                            pw_nonce: row.get(2)?,
+                            version: row.get(3)?,
+                            origination: row.get(4)?,
+                            created: row.get(5)?,
+                        },
+                    })
+                },
+            )
+            .optional()
+            .map_err(storage)
+    }
+
+    pub(crate) fn store_code_challenge(
+        &self,
+        challenge: &str,
+        user_uuid: &str,
+        expires_at: i64,
+    ) -> Result<(), ServerError> {
+        self.connection
+            .execute(
+                "INSERT OR REPLACE INTO code_challenges (challenge, user_uuid, expires_at)
+                 VALUES (?1, ?2, ?3)",
+                params![challenge, user_uuid, expires_at],
+            )
+            .map(drop)
+            .map_err(storage)
+    }
+
+    /// Removes the user's code challenge, and says whether it was there and
+    /// still in date. Each challenge can be used once.
+    pub(crate) fn take_code_challenge(
+        &self,
+        challenge: &str,
+        user_uuid: &str,
+        now: i64,
+    ) -> Result<bool, ServerError> {
+        self.connection
+            .query_row(
+                "DELETE FROM code_challenges WHERE challenge = ?1 AND user_uuid = ?2
+                 RETURNING expires_at > ?3",
+                params![challenge, user_uuid, now],
+                |row| row.get(0),
+            )
+            .optional()
+            .map(|in_date| in_date == Some(true))
+            .map_err(storage)
+    }
+}
+
+fn insert_session(
+    connection: &Connection,
+    user_uuid: &str,
+    session: &NewSession,
+    now: i64,
+) -> Result<(), ServerError> {
+    connection
+        .execute(
+            "INSERT INTO sessions (uuid, user_uuid, access_token_hash, refresh_token_hash,
+                access_expiration, refresh_expiration, created_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![
+                session.uuid,
+                user_uuid,
+                hash(&session.access_token),
+                hash(&session.refresh_token),
+                session.access_expiration,
+                session.refresh_expiration,
+                now,
+            ],
+        )
+        .map(drop)
+        .map_err(storage)
 }

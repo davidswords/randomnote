@@ -7,6 +7,7 @@ mod error;
 mod http;
 mod registration;
 mod session;
+mod sign_in;
 
 pub use accounts::{Accounts, Clock, SystemClock};
 pub use database::Database;

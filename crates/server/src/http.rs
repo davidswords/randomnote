@@ -13,10 +13,13 @@ use serde_json::{Map, Value, json};
 use crate::accounts::{Accounts, SignedIn};
 use crate::error::ServerError;
 use crate::registration::{KeyParams, Registration};
+use crate::sign_in::{KeyParamsRequest, SignIn};
 
 pub fn router(accounts: Accounts) -> Router {
     Router::new()
         .route("/v1/users", post(register))
+        .route("/v2/login-params", post(login_params))
+        .route("/v2/login", post(login))
         .with_state(Arc::new(accounts))
 }
 
@@ -25,11 +28,35 @@ async fn register(
     body: Result<Json<Registration>, JsonRejection>,
 ) -> Result<Json<Value>, ServerError> {
     let Json(registration) = body.map_err(|_| ServerError::InvalidJson)?;
-    // bcrypt and SQLite block, so they run off the async threads.
-    let signed_in = tokio::task::spawn_blocking(move || accounts.register(registration))
-        .await
-        .expect("registration doesn't panic")?;
+    let signed_in = off_async_threads(move || accounts.register(registration)).await?;
     Ok(Json(signed_in_body(&signed_in)))
+}
+
+async fn login_params(
+    State(accounts): State<Arc<Accounts>>,
+    body: Result<Json<KeyParamsRequest>, JsonRejection>,
+) -> Result<Json<Value>, ServerError> {
+    let Json(request) = body.map_err(|_| ServerError::InvalidJson)?;
+    let params = off_async_threads(move || accounts.key_params(request)).await?;
+    Ok(Json(key_params_body(&params)))
+}
+
+async fn login(
+    State(accounts): State<Arc<Accounts>>,
+    body: Result<Json<SignIn>, JsonRejection>,
+) -> Result<Json<Value>, ServerError> {
+    let Json(sign_in) = body.map_err(|_| ServerError::InvalidJson)?;
+    let signed_in = off_async_threads(move || accounts.sign_in(sign_in)).await?;
+    Ok(Json(signed_in_body(&signed_in)))
+}
+
+/// bcrypt and SQLite block, so they run off the async threads.
+async fn off_async_threads<T: Send + 'static>(
+    work: impl FnOnce() -> Result<T, ServerError> + Send + 'static,
+) -> Result<T, ServerError> {
+    tokio::task::spawn_blocking(work)
+        .await
+        .expect("account work doesn't panic")
 }
 
 fn signed_in_body(signed_in: &SignedIn) -> Value {
@@ -71,9 +98,15 @@ impl IntoResponse for ServerError {
                 eprintln!("storage error: {detail}");
                 StatusCode::INTERNAL_SERVER_ERROR
             }
+            Self::IncompleteSignIn | Self::WrongCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::BAD_REQUEST,
         };
-        let body = json!({ "error": { "message": self.to_string() } });
+        let body = match self {
+            Self::IncompleteSignIn => {
+                json!({ "error": { "tag": "invalid-auth", "message": self.to_string() } })
+            }
+            _ => json!({ "error": { "message": self.to_string() } }),
+        };
         (status, Json(body)).into_response()
     }
 }
