@@ -3,7 +3,7 @@
 
 use tauri::Manager;
 
-use crate::{VaultState, open_vault, remove_randomnote_data, with_commands};
+use crate::{VaultState, open_vault, remove_unencrypted_data, with_commands};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,7 +11,7 @@ pub fn run() {
         .setup(|app| {
             let data_directory = app.path().app_data_dir()?;
             // If this fails the app still opens, and tries again next launch.
-            let _ = remove_randomnote_data(&data_directory);
+            let _ = remove_unencrypted_data(&data_directory);
             let vault = open_vault(&data_directory)?;
             app.manage(VaultState::new(vault));
             Ok(())
