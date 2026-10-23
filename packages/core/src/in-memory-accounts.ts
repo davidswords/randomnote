@@ -1,4 +1,4 @@
-import { AccountError, type Accounts, checkPassword } from "./account";
+import { AccountError, type Accounts, checkEmail, checkPassword } from "./account";
 
 /** Keeps one account in memory, for tests and as a reference. */
 export class InMemoryAccounts implements Accounts {
@@ -8,8 +8,8 @@ export class InMemoryAccounts implements Accounts {
     return this.password !== undefined;
   }
 
-  async createAccount(_username: string, password: string): Promise<void> {
-    const problem = checkPassword(password);
+  async createAccount(email: string, password: string): Promise<void> {
+    const problem = checkEmail(email) ?? checkPassword(password);
     if (problem) throw new AccountError(problem);
     if (await this.hasAccount()) {
       throw new AccountError("An account already exists on this device.");

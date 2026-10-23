@@ -27,12 +27,12 @@ pub fn has_account(state: State<'_, VaultState>) -> Result<bool, String> {
 #[tauri::command]
 pub fn create_account(
     state: State<'_, VaultState>,
-    username: String,
+    email: String,
     password: String,
 ) -> Result<(), String> {
     state
         .vault()?
-        .create_account(&username, &password)
+        .create_account(&email, &password)
         .map_err(to_message)
 }
 

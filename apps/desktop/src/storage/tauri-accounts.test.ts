@@ -14,18 +14,18 @@ describe("TauriAccounts messages", () => {
     expect(commands.calls).toEqual([{ command: "has_account", args: undefined }]);
   });
 
-  it("creates the account with create_account, passing the username and password", async () => {
+  it("creates the account with create_account, passing the email and password", async () => {
     const commands = fakeAccountCommands();
 
     await new TauriAccounts(commands.invoke).createAccount(
-      "david",
+      "david@example.com",
       "correct horse battery staple",
     );
 
     expect(commands.calls).toEqual([
       {
         command: "create_account",
-        args: { username: "david", password: "correct horse battery staple" },
+        args: { email: "david@example.com", password: "correct horse battery staple" },
       },
     ]);
   });
@@ -33,7 +33,7 @@ describe("TauriAccounts messages", () => {
   it("unlocks with unlock, passing the password", async () => {
     const commands = fakeAccountCommands();
     const accounts = new TauriAccounts(commands.invoke);
-    await accounts.createAccount("david", "correct horse battery staple");
+    await accounts.createAccount("david@example.com", "correct horse battery staple");
 
     await accounts.unlock("correct horse battery staple");
 

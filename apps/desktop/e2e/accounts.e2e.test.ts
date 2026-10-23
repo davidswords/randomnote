@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { AppDriver } from "./app";
 import {
+  EMAIL,
   PASSWORD,
   addTask,
   enterPassword,
@@ -32,13 +33,24 @@ describe("accounts", () => {
 
   it("refuses a password shorter than 12 characters at sign-up", async () => {
     const app = await driver.launch();
-    await app.$('input[aria-label="Username"]').setValue("david");
+    await app.$('input[aria-label="Email"]').setValue(EMAIL);
     await app.$('input[aria-label="Password"]').setValue("short");
     await app.$('input[aria-label="Confirm password"]').setValue("short");
 
     await app.$("button=Create account").click();
 
     expect(await shownMessage(app)).toBe("The password must be at least 12 characters.");
+  });
+
+  it("refuses an invalid email at sign-up", async () => {
+    const app = await driver.launch();
+    await app.$('input[aria-label="Email"]').setValue("david");
+    await app.$('input[aria-label="Password"]').setValue(PASSWORD);
+    await app.$('input[aria-label="Confirm password"]').setValue(PASSWORD);
+
+    await app.$("button=Create account").click();
+
+    expect(await shownMessage(app)).toBe("Enter a valid email address.");
   });
 
   it("stays locked with the wrong password, and opens with the right one", async () => {

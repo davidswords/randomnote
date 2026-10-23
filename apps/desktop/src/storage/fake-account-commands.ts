@@ -17,7 +17,7 @@ export function fakeAccountCommands(): { invoke: Invoke; calls: Call[] } {
       case "has_account":
         return accounts.hasAccount();
       case "create_account":
-        return accounts.createAccount(args?.username as string, args?.password as string);
+        return accounts.createAccount(args?.email as string, args?.password as string);
       case "unlock":
         return accounts.unlock(args?.password as string);
       default:

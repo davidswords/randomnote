@@ -48,7 +48,7 @@ impl TestApp {
     pub fn create_account(&self) -> Result<Value, Value> {
         self.invoke(
             "create_account",
-            serde_json::json!({ "username": "david", "password": PASSWORD }),
+            serde_json::json!({ "email": "david@example.com", "password": PASSWORD }),
         )
     }
 

@@ -89,7 +89,7 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 
 ## First proof of concept (Decided)
 
-No server yet. On first launch the user creates an account with a **username and password** on the device. Keys are derived exactly as above, with the username in place of the email, and tasks are encrypted in the local database. Each launch asks for the password to unlock them. The server password half is unused until a server exists.
+No server yet. On first launch the user creates an account with an **email and password** on the device. Keys are derived exactly as above, and tasks are encrypted in the local database. The email isn't verified until there is a server. Each launch asks for the password to unlock them. The server password half is unused until a server exists.
 
 - **Sign-up:** the password is typed twice and must be at least **12 characters**. The sign-up screen warns that a forgotten password can't be recovered without a recovery key.
 - **Unlocking:** a wrong password shows "Wrong password" and unlocks nothing. It's detected when the stored items key fails to decrypt.
