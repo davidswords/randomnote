@@ -5,6 +5,7 @@ use std::path::Path;
 use randomtask_store::{EncryptedStore, StoredItem, Task};
 use randomtask_vault::{Vault, VaultError};
 
+const EMAIL: &str = "david@example.com";
 const PASSWORD: &str = "correct horse battery staple";
 
 fn a_task(id: &str, title: &str) -> Task {
@@ -20,7 +21,7 @@ fn a_vault() -> Vault {
 
 fn an_unlocked_vault() -> Vault {
     let mut vault = a_vault();
-    vault.create_account("david", PASSWORD).unwrap();
+    vault.create_account(EMAIL, PASSWORD).unwrap();
     vault
 }
 
@@ -61,7 +62,7 @@ fn is_unlocked_after_creating_an_account() {
 fn accepts_a_password_of_exactly_12_characters() {
     let mut vault = a_vault();
 
-    assert_eq!(vault.create_account("david", "123456789012"), Ok(()));
+    assert_eq!(vault.create_account(EMAIL, "123456789012"), Ok(()));
 }
 
 #[test]
@@ -69,7 +70,7 @@ fn refuses_a_password_shorter_than_12_characters_and_creates_no_account() {
     let mut vault = a_vault();
 
     assert_eq!(
-        vault.create_account("david", "12345678901"),
+        vault.create_account(EMAIL, "12345678901"),
         Err(VaultError::PasswordTooShort)
     );
     assert_eq!(vault.has_account(), Ok(false));
@@ -80,7 +81,7 @@ fn counts_characters_rather_than_bytes_in_the_password() {
     let mut vault = a_vault();
 
     assert_eq!(
-        vault.create_account("david", "ééééééééééé"),
+        vault.create_account(EMAIL, "ééééééééééé"),
         Err(VaultError::PasswordTooShort)
     );
 }
@@ -90,7 +91,7 @@ fn refuses_a_second_account() {
     let mut vault = an_unlocked_vault();
 
     assert_eq!(
-        vault.create_account("someone-else", PASSWORD),
+        vault.create_account("someone@example.com", PASSWORD),
         Err(VaultError::AccountExists)
     );
 }
@@ -122,7 +123,7 @@ fn unlocks_with_the_right_password_after_restarting() {
     let path = directory.path().join("randomtask.db");
     {
         let mut vault = open_vault(&path);
-        vault.create_account("david", PASSWORD).unwrap();
+        vault.create_account(EMAIL, PASSWORD).unwrap();
         vault.save_task(&a_task("task-1", "Buy milk")).unwrap();
     }
     let mut reopened = open_vault(&path);
@@ -141,7 +142,7 @@ fn refuses_the_wrong_password_and_stays_locked() {
     let path = directory.path().join("randomtask.db");
     {
         let mut vault = open_vault(&path);
-        vault.create_account("david", PASSWORD).unwrap();
+        vault.create_account(EMAIL, PASSWORD).unwrap();
     }
     let mut reopened = open_vault(&path);
 
@@ -192,7 +193,7 @@ fn writes_no_task_title_or_password_to_the_database_file() {
     let path = directory.path().join("randomtask.db");
     {
         let mut vault = open_vault(&path);
-        vault.create_account("david", PASSWORD).unwrap();
+        vault.create_account(EMAIL, PASSWORD).unwrap();
         vault.save_task(&a_task("task-1", "Buy milk")).unwrap();
     }
 
@@ -207,7 +208,7 @@ fn reports_a_storage_failure() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("randomtask.db");
     let mut vault = open_vault(&path);
-    vault.create_account("david", PASSWORD).unwrap();
+    vault.create_account(EMAIL, PASSWORD).unwrap();
     rusqlite::Connection::open(&path)
         .unwrap()
         .execute_batch("DROP TABLE items;")
@@ -224,7 +225,7 @@ fn reports_a_tampered_task_as_corrupt() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("randomtask.db");
     let mut vault = open_vault(&path);
-    vault.create_account("david", PASSWORD).unwrap();
+    vault.create_account(EMAIL, PASSWORD).unwrap();
     vault.save_task(&a_task("task-1", "Buy milk")).unwrap();
     let store = EncryptedStore::open(&path).unwrap();
     let saved = store.find_item("task-1").unwrap().unwrap();
@@ -246,7 +247,7 @@ fn reports_a_task_whose_items_key_is_missing_as_corrupt() {
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("randomtask.db");
     let mut vault = open_vault(&path);
-    vault.create_account("david", PASSWORD).unwrap();
+    vault.create_account(EMAIL, PASSWORD).unwrap();
     vault.save_task(&a_task("task-1", "Buy milk")).unwrap();
     let store = EncryptedStore::open(&path).unwrap();
     let saved = store.find_item("task-1").unwrap().unwrap();
@@ -264,7 +265,55 @@ fn reports_a_task_whose_items_key_is_missing_as_corrupt() {
 }
 
 #[test]
+fn refuses_an_invalid_email_and_creates_no_account() {
+    for email in [
+        "",
+        "   ",
+        "david",
+        "david@",
+        "@example.com",
+        "david@example",
+        "david@.example.com",
+        "david@example.",
+        "da vid@example.com",
+        "david@exam ple.com",
+        "david@@example.com",
+        "da@vid@example.com",
+    ] {
+        let mut vault = a_vault();
+
+        assert_eq!(
+            vault.create_account(email, PASSWORD),
+            Err(VaultError::InvalidEmail),
+            "{email:?}"
+        );
+        assert_eq!(vault.has_account(), Ok(false), "{email:?}");
+    }
+}
+
+#[test]
+fn stores_the_email_trimmed_and_in_lower_case() {
+    let directory = tempfile::tempdir().unwrap();
+    let path = directory.path().join("randomtask.db");
+    open_vault(&path)
+        .create_account("  David@Example.COM ", PASSWORD)
+        .unwrap();
+
+    let account = EncryptedStore::open(&path)
+        .unwrap()
+        .account()
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(account.identifier, "david@example.com");
+}
+
+#[test]
 fn explains_each_error_to_the_user() {
+    assert_eq!(
+        VaultError::InvalidEmail.to_string(),
+        "Enter a valid email address."
+    );
     assert_eq!(
         VaultError::PasswordTooShort.to_string(),
         "The password must be at least 12 characters."
