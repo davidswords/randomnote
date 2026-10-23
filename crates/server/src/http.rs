@@ -4,7 +4,8 @@ use std::sync::Arc;
 
 use axum::extract::State;
 use axum::extract::rejection::JsonRejection;
-use axum::http::StatusCode;
+use axum::http::header::AUTHORIZATION;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::post;
 use axum::{Json, Router};
@@ -13,6 +14,7 @@ use serde_json::{Map, Value, json};
 use crate::accounts::{Accounts, SignedIn};
 use crate::error::ServerError;
 use crate::registration::{KeyParams, Registration};
+use crate::session::{NewSession, Refresh};
 use crate::sign_in::{KeyParamsRequest, SignIn};
 
 pub fn router(accounts: Accounts) -> Router {
@@ -20,6 +22,8 @@ pub fn router(accounts: Accounts) -> Router {
         .route("/v1/users", post(register))
         .route("/v2/login-params", post(login_params))
         .route("/v2/login", post(login))
+        .route("/v1/sessions/refresh", post(refresh))
+        .route("/v1/logout", post(sign_out))
         .with_state(Arc::new(accounts))
 }
 
@@ -50,6 +54,29 @@ async fn login(
     Ok(Json(signed_in_body(&signed_in)))
 }
 
+async fn refresh(
+    State(accounts): State<Arc<Accounts>>,
+    body: Result<Json<Refresh>, JsonRejection>,
+) -> Result<Json<Value>, ServerError> {
+    let Json(refresh) = body.map_err(|_| ServerError::InvalidJson)?;
+    let session = off_async_threads(move || accounts.refresh(refresh)).await?;
+    Ok(Json(json!({ "session": session_body(&session) })))
+}
+
+async fn sign_out(
+    State(accounts): State<Arc<Accounts>>,
+    headers: HeaderMap,
+) -> Result<StatusCode, ServerError> {
+    let access_token = headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.strip_prefix("Bearer "))
+        .ok_or(ServerError::InvalidSessionToken)?
+        .to_owned();
+    off_async_threads(move || accounts.sign_out(&access_token)).await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
 /// bcrypt and SQLite block, so they run off the async threads.
 async fn off_async_threads<T: Send + 'static>(
     work: impl FnOnce() -> Result<T, ServerError> + Send + 'static,
@@ -60,20 +87,23 @@ async fn off_async_threads<T: Send + 'static>(
 }
 
 fn signed_in_body(signed_in: &SignedIn) -> Value {
-    let session = &signed_in.session;
     json!({
-        "session": {
-            "access_token": session.full_access_token(),
-            "refresh_token": session.full_refresh_token(),
-            "access_expiration": session.access_expiration,
-            "refresh_expiration": session.refresh_expiration,
-            "readonly_access": false,
-        },
+        "session": session_body(&signed_in.session),
         "key_params": key_params_body(&signed_in.key_params),
         "user": {
             "uuid": signed_in.user_uuid,
             "email": signed_in.key_params.identifier,
         },
+    })
+}
+
+fn session_body(session: &NewSession) -> Value {
+    json!({
+        "access_token": session.full_access_token(),
+        "refresh_token": session.full_refresh_token(),
+        "access_expiration": session.access_expiration,
+        "refresh_expiration": session.refresh_expiration,
+        "readonly_access": false,
     })
 }
 
@@ -98,15 +128,21 @@ impl IntoResponse for ServerError {
                 eprintln!("storage error: {detail}");
                 StatusCode::INTERNAL_SERVER_ERROR
             }
-            Self::IncompleteSignIn | Self::WrongCredentials => StatusCode::UNAUTHORIZED,
+            Self::IncompleteSignIn | Self::WrongCredentials | Self::InvalidSessionToken => {
+                StatusCode::UNAUTHORIZED
+            }
             Self::Locked => StatusCode::LOCKED,
             _ => StatusCode::BAD_REQUEST,
         };
-        let body = match self {
-            Self::IncompleteSignIn => {
-                json!({ "error": { "tag": "invalid-auth", "message": self.to_string() } })
-            }
-            _ => json!({ "error": { "message": self.to_string() } }),
+        let tag = match self {
+            Self::IncompleteSignIn => Some("invalid-auth"),
+            Self::InvalidRefreshToken => Some("invalid-refresh-token"),
+            Self::ExpiredRefreshToken => Some("expired-refresh-token"),
+            _ => None,
+        };
+        let body = match tag {
+            Some(tag) => json!({ "error": { "tag": tag, "message": self.to_string() } }),
+            None => json!({ "error": { "message": self.to_string() } }),
         };
         (status, Json(body)).into_response()
     }

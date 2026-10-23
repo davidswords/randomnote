@@ -3,6 +3,7 @@
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
 const DAY_MS: i64 = 24 * 60 * 60 * 1000;
@@ -23,8 +24,13 @@ pub(crate) struct NewSession {
 
 impl NewSession {
     pub fn start(now: i64) -> Self {
+        Self::renew(uuid::Uuid::now_v7().to_string(), now)
+    }
+
+    /// New tokens and expirations for an existing session.
+    pub fn renew(uuid: String, now: i64) -> Self {
         Self {
-            uuid: uuid::Uuid::now_v7().to_string(),
+            uuid,
             access_token: random_token(),
             refresh_token: random_token(),
             access_expiration: now + ACCESS_AGE_MS,
@@ -38,6 +44,23 @@ impl NewSession {
 
     pub fn full_refresh_token(&self) -> String {
         format!("1:{}:{}", self.uuid, self.refresh_token)
+    }
+}
+
+/// A refresh as the client sends it, with both full tokens.
+#[derive(Debug, Deserialize)]
+pub(crate) struct Refresh {
+    pub access_token: Option<String>,
+    pub refresh_token: Option<String>,
+}
+
+/// A full token split into its session's uuid and its secret, if it's in
+/// the `1:<session uuid>:<secret>` format.
+pub(crate) fn parse(token: &str) -> Option<(&str, &str)> {
+    let mut parts = token.split(':');
+    match (parts.next(), parts.next(), parts.next(), parts.next()) {
+        (Some("1"), Some(uuid), Some(secret), None) => Some((uuid, secret)),
+        _ => None,
     }
 }
 
