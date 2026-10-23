@@ -31,9 +31,22 @@ fn create_account_explains_a_password_that_is_too_short() {
     assert_eq!(
         app.invoke(
             "create_account",
-            json!({ "username": "david", "password": "too short" })
+            json!({ "email": "david@example.com", "password": "too short" })
         ),
         Err(json!("The password must be at least 12 characters."))
+    );
+}
+
+#[test]
+fn create_account_explains_an_invalid_email() {
+    let app = TestApp::without_account();
+
+    assert_eq!(
+        app.invoke(
+            "create_account",
+            json!({ "email": "david", "password": PASSWORD })
+        ),
+        Err(json!("Enter a valid email address."))
     );
 }
 

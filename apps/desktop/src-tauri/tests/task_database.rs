@@ -14,7 +14,7 @@ fn creates_the_data_directory_and_keeps_tasks_across_restarts() {
     {
         let mut vault = open_vault(&data_directory).unwrap();
         vault
-            .create_account("david", "correct horse battery staple")
+            .create_account("david@example.com", "correct horse battery staple")
             .unwrap();
         vault.save_task(&task).unwrap();
     }
