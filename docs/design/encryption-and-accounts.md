@@ -91,6 +91,10 @@ Time-based one-time codes (TOTP) from an authenticator app, with a one-off recov
 
 No server yet. On first launch the user creates an account with a **username and password** on the device. Keys are derived exactly as above, with the username in place of the email, and tasks are encrypted in the local database. Each launch asks for the password to unlock them. The server password half is unused until a server exists.
 
+- **Sign-up:** the password is typed twice and must be at least **12 characters**. The sign-up screen warns that a forgotten password can't be recovered without a recovery key.
+- **Unlocking:** a wrong password shows "Wrong password" and unlocks nothing. It's detected when the stored items key fails to decrypt.
+- **Tasks from 0.2.0 start fresh:** they were stored as plain text, so they're deleted and the old table's space is wiped (`VACUUM`), rather than being migrated.
+
 ## Open questions
 
 - **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.

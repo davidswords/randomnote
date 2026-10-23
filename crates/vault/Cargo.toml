@@ -1,0 +1,22 @@
+[package]
+name = "randomtask-vault"
+version = "0.1.0"
+edition = "2024"
+description = "Encrypted task storage for randomtask, unlocked by the account password"
+license = "GPL-3.0-only"
+
+[dependencies]
+getrandom = "0.4"
+hex = "0.4"
+randomtask-crypto = { version = "0.1.0", path = "../crypto" }
+randomtask-store = { version = "0.1.0", path = "../store" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+rusqlite = { version = "0.40", features = ["bundled"] }
+tempfile = "3"
+
+# Argon2 is deliberately slow; optimise dependencies even in test builds.
+[profile.dev.package."*"]
+opt-level = 3

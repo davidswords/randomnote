@@ -1,6 +1,6 @@
-//! Opening the task database in the app's data directory, on a real disk.
+//! Opening the vault in the app's data directory, on a real disk.
 
-use randomtask_lib::open_task_database;
+use randomtask_lib::open_vault;
 use randomtask_store::Task;
 
 #[test]
@@ -11,13 +11,17 @@ fn creates_the_data_directory_and_keeps_tasks_across_restarts() {
         id: "task-1".to_owned(),
         title: "Buy milk".to_owned(),
     };
+    {
+        let mut vault = open_vault(&data_directory).unwrap();
+        vault
+            .create_account("david", "correct horse battery staple")
+            .unwrap();
+        vault.save_task(&task).unwrap();
+    }
 
-    open_task_database(&data_directory)
-        .unwrap()
-        .save(&task)
-        .unwrap();
-    let reopened = open_task_database(&data_directory).unwrap();
+    let mut reopened = open_vault(&data_directory).unwrap();
+    reopened.unlock("correct horse battery staple").unwrap();
 
-    assert_eq!(reopened.list().unwrap(), vec![task]);
-    assert!(data_directory.join("tasks.db").exists());
+    assert_eq!(reopened.list_tasks(), Ok(vec![task]));
+    assert!(data_directory.join("randomtask.db").exists());
 }

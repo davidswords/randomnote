@@ -3,14 +3,14 @@
 
 use tauri::Manager;
 
-use crate::{TaskState, open_task_database, with_task_commands};
+use crate::{VaultState, open_vault, with_commands};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    with_task_commands(tauri::Builder::default())
+    with_commands(tauri::Builder::default())
         .setup(|app| {
-            let store = open_task_database(&app.path().app_data_dir()?)?;
-            app.manage(TaskState::new(store));
+            let vault = open_vault(&app.path().app_data_dir()?)?;
+            app.manage(VaultState::new(vault));
             Ok(())
         })
         .run(tauri::generate_context!())

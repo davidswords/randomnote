@@ -56,7 +56,7 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Each user has their own storage bucket;** users' data never shares one.
 - **Encryption at rest:** records are always stored encrypted on the device and decrypted only in memory. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
-- **The first accounts proof of concept has no server:** a local username and password that encrypt the data on the device.
+- **The first accounts proof of concept has no server:** a local username and password that encrypt the data on the device. The password is typed twice at sign-up and is at least 12 characters. Unencrypted tasks from 0.2.0 are deleted, not migrated.
 - **Sync can be switched off, uploads can be size-limited, and storage is flexible,** with S3-compatible storage as the likely default.
 - **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.
 
