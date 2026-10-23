@@ -10,6 +10,7 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Open source first.** Anyone can download, build and run it on their own hardware from GitHub. The licence is GPL-3.0-only.
 - **Client-side encrypted.** Data is encrypted on the device.
 - **Highly performant.**
+- **The window shows the app's name and version** (for example "randomtask 0.2.1") at the bottom, on every screen.
 
 ## Tasks
 
