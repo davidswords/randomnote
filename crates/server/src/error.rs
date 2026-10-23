@@ -17,6 +17,11 @@ pub enum ServerError {
     WrongCredentials,
     /// Too many failed sign-ins in a row for this email.
     Locked,
+    MissingRefreshTokens,
+    InvalidRefreshToken,
+    ExpiredRefreshToken,
+    /// A sign-out without a valid access token.
+    InvalidSessionToken,
     /// The database failed. The detail is logged, never shown.
     Storage(String),
 }
@@ -35,6 +40,10 @@ impl fmt::Display for ServerError {
             Self::IncompleteSignIn => "Invalid login credentials.",
             Self::WrongCredentials => "Invalid email or password",
             Self::Locked => "Too many failed sign-ins. Please try again in an hour.",
+            Self::MissingRefreshTokens => "Please provide all required parameters.",
+            Self::InvalidRefreshToken => "The refresh token is not valid.",
+            Self::ExpiredRefreshToken => "The refresh token has expired.",
+            Self::InvalidSessionToken => "Invalid session token.",
             Self::Storage(_) => "Something went wrong. Please try again.",
         })
     }

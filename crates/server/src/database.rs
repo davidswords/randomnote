@@ -51,6 +51,13 @@ pub(crate) struct StoredUser {
     pub key_params: KeyParams,
 }
 
+/// A stored session's token hashes and when the session can last be refreshed.
+pub(crate) struct StoredSession {
+    pub access_token_hash: String,
+    pub refresh_token_hash: String,
+    pub refresh_expiration: i64,
+}
+
 /// A user about to be stored. The password is already a bcrypt hash.
 pub(crate) struct NewUser<'a> {
     pub uuid: &'a str,
@@ -204,6 +211,50 @@ impl Database {
                     params![email, limit, locked_until],
                 )
             })
+            .map(drop)
+            .map_err(storage)
+    }
+
+    pub(crate) fn find_session(&self, uuid: &str) -> Result<Option<StoredSession>, ServerError> {
+        self.connection
+            .query_row(
+                "SELECT access_token_hash, refresh_token_hash, refresh_expiration
+                 FROM sessions WHERE uuid = ?1",
+                [uuid],
+                |row| {
+                    Ok(StoredSession {
+                        access_token_hash: row.get(0)?,
+                        refresh_token_hash: row.get(1)?,
+                        refresh_expiration: row.get(2)?,
+                    })
+                },
+            )
+            .optional()
+            .map_err(storage)
+    }
+
+    /// Replaces the session's tokens and expirations with `session`'s.
+    pub(crate) fn renew_session(&self, session: &NewSession) -> Result<(), ServerError> {
+        self.connection
+            .execute(
+                "UPDATE sessions SET access_token_hash = ?2, refresh_token_hash = ?3,
+                    access_expiration = ?4, refresh_expiration = ?5
+                 WHERE uuid = ?1",
+                params![
+                    session.uuid,
+                    hash(&session.access_token),
+                    hash(&session.refresh_token),
+                    session.access_expiration,
+                    session.refresh_expiration,
+                ],
+            )
+            .map(drop)
+            .map_err(storage)
+    }
+
+    pub(crate) fn delete_session(&self, uuid: &str) -> Result<(), ServerError> {
+        self.connection
+            .execute("DELETE FROM sessions WHERE uuid = ?1", [uuid])
             .map(drop)
             .map_err(storage)
     }

@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::database::{Database, NewUser, StoredUser};
 use crate::error::{ServerError, storage};
 use crate::registration::{KeyParams, Registration, VERSION, validate};
-use crate::session::NewSession;
+use crate::session::{NewSession, Refresh, hash, parse};
 use crate::sign_in::{
     CODE_CHALLENGE_AGE_MS, KeyParamsRequest, SignIn, code_challenge, pseudo_seed,
 };
@@ -172,5 +172,43 @@ impl Accounts {
             key_params: user.key_params,
             session,
         })
+    }
+
+    /// New tokens for a session, given its current access and refresh tokens.
+    /// The old tokens stop working.
+    pub(crate) fn refresh(&self, refresh: Refresh) -> Result<NewSession, ServerError> {
+        let (Some(access_token), Some(refresh_token)) =
+            (refresh.access_token, refresh.refresh_token)
+        else {
+            return Err(ServerError::MissingRefreshTokens);
+        };
+        let (uuid, refresh_secret) =
+            parse(&refresh_token).ok_or(ServerError::InvalidRefreshToken)?;
+        let access_uuid = parse(&access_token).map(|(uuid, _)| uuid);
+        let database = self.database();
+        let session = database
+            .find_session(uuid)?
+            .filter(|session| {
+                access_uuid == Some(uuid) && session.refresh_token_hash == hash(refresh_secret)
+            })
+            .ok_or(ServerError::InvalidRefreshToken)?;
+        let now = self.clock.now();
+        if session.refresh_expiration <= now {
+            return Err(ServerError::ExpiredRefreshToken);
+        }
+        let renewed = NewSession::renew(uuid.to_owned(), now);
+        database.renew_session(&renewed)?;
+        Ok(renewed)
+    }
+
+    /// Ends the session the access token belongs to.
+    pub(crate) fn sign_out(&self, access_token: &str) -> Result<(), ServerError> {
+        let (uuid, secret) = parse(access_token).ok_or(ServerError::InvalidSessionToken)?;
+        let database = self.database();
+        database
+            .find_session(uuid)?
+            .filter(|session| session.access_token_hash == hash(secret))
+            .ok_or(ServerError::InvalidSessionToken)?;
+        database.delete_session(uuid)
     }
 }

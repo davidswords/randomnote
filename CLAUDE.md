@@ -29,7 +29,7 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
 - `crates/store`: SQLite storage in Rust (rusqlite, bundled SQLite). No Tauri dependency, so it builds and tests anywhere.
 - `crates/crypto`: encryption following the Standard Notes 004 protocol (Argon2id key derivation, XChaCha20-Poly1305 record encryption, and the items-key hierarchy). Test vectors come from independent reference implementations, never from this crate.
 - `crates/vault`: the account and its encrypted tasks. It derives keys from the password with `crates/crypto`, stores only ciphertext with `crates/store`, and holds keys only in memory while unlocked.
-- `crates/server`: the randomtask server (axum, SQLite). It registers accounts and signs them in at the paths and in the formats the Standard Notes client uses. It never sees passwords or keys, only the server password, which it stores as a bcrypt hash.
+- `crates/server`: the randomtask server (axum, SQLite). It registers accounts, signs them in, refreshes their sessions and signs them out, at the paths and in the formats the Standard Notes client uses. It never sees passwords or keys, only the server password, which it stores as a bcrypt hash.
 
 ## Commands
 
