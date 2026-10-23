@@ -33,8 +33,25 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Every task has at least one tag.** A new task is tagged `#inbox` automatically, and a task can never be left with no tags.
 - **`#inbox` is not removed automatically.** A task can be in `#inbox` and other tags at the same time.
 - **Removing a task's last tag puts it back in `#inbox`.**
-- **Any tag can be pinned** to the top.
-- **Smart lists** are saved queries over several tags, and they can be pinned too.
+- **Smart lists** are saved queries over several tags.
+- **The sidebar has two parts,** as in Apple Reminders:
+  - **Pinned:** tags and smart lists shown as tiles (icon, colour, count of open tasks) in an order the user arranges.
+  - **Everything else:** tags listed alphabetically at every level of the hierarchy.
+
+## Priority and expiry
+
+- **Importance** is set on tags and on tasks, from 1 to 10 (10 is the most important). 7 isn't allowed, so there's no safe middle choice. The default is 1.
+- **Urgency comes from the due date and time.** It isn't set by hand.
+- **The priority score** combines tag importance, task importance and urgency. An important, urgent task in a low-importance tag can rank above minor tasks in an important tag.
+- **Smart lists sort by any single field** (such as due date or importance) **or by the priority score.**
+- **An expiry window** can be set on a tag or a task: a whole number of hours, days, weeks, months or years. Expiry is separate from the due date.
+- **The window counts from when the task was created.** For a recurring task, each occurrence counts from when that occurrence was created.
+- **The window set highest in the hierarchy wins:** a parent tag's over a child tag's, and a tag's over a task's.
+- **When a task expires:**
+  - a one-off task is archived;
+  - an occurrence of a recurring task is set aside, and the next occurrence appears at its usual time.
+
+  This is a deliberate difference from Apple Reminders, which has no expiry.
 
 ## Platforms and distribution
 
@@ -68,6 +85,10 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Can a child tag be unarchived while its parent stays archived?
 - What happens to a tag's tasks when the tag is deleted?
 - Smart lists: which operators do queries support (all of these tags, any of them, excluding a tag), and can they filter on anything besides tags?
+- The priority formula: how tag importance, task importance and urgency are weighed, and whether an estimated duration plays a part.
+- Can a smart list sort by one field, then break ties with another?
+- Which expiry window wins when a task's tags are in different branches of the hierarchy?
+- Where can archived and expired tasks be seen, and can they be restored?
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
 - Web version: possibly later, with a browser storage adapter (SQLite compiled to WebAssembly, or IndexedDB) behind the same `TaskRepository`. Encryption code would then need to run in the browser too.

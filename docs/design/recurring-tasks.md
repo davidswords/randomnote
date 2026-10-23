@@ -4,7 +4,7 @@ How randomtask models tasks that repeat. Decided points are marked **Decided**. 
 
 ## Guiding principle (Decided)
 
-Recurring tasks behave **exactly like Apple Reminders**. Where this note and Reminders disagree, Reminders wins. Reminders' behaviour is confirmed on a Mac before it becomes a test case.
+Recurring tasks behave **exactly like Apple Reminders**. Where this note and Reminders disagree, Reminders wins. Reminders' behaviour is confirmed on a Mac before it becomes a test case. The one deliberate exception is expiry, which Reminders doesn't have (see [decisions](../decisions.md#priority-and-expiry)).
 
 ## Model: series plus occurrences (Decided)
 
