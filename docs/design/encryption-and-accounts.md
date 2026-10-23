@@ -120,7 +120,8 @@ Our own server in Rust, in `crates/server`, at the paths and in the formats the 
 - **Locking:** six failed sign-ins in a row lock the email for an hour, with a 423 and "Too many failed sign-ins. Please try again in an hour.", even for the right password. These are the values in Standard Notes' sample configuration. A successful sign-in starts the count again. The lock is kept by email, not by account, so an unknown email is locked the same way and the lock doesn't reveal which emails have accounts. Unlike Standard Notes, there's no captcha to get past the lock early.
 - **Refreshing:** `POST /v1/sessions/refresh` with both full tokens gives the session new tokens and expirations, and the old tokens stop working. A refresh token that's wrong, used already, or from another session gets a 400 with the tag `invalid-refresh-token`; one more than a year old gets `expired-refresh-token`.
 - **Signing out:** `POST /v1/logout` with `Authorization: Bearer <access token>` ends that session only, with a 204. A missing or wrong token gets a 401, "Invalid session token."
-- **Next:** the app using the server: registering and signing in from the account menu.
+- **The app's client** is `crates/client/api`. It sends the server password as hex, makes a 256-bit code verifier for each sign-in, and refuses key parameters for any version but `004`, so a server can't downgrade the protocol. It's tested against the real server code.
+- **Next:** the vault using the client: registering on sign-up and on the next unlock of a device-only account.
 
 ## Open questions
 

@@ -29,3 +29,13 @@ updates:
     directory: /crates/client/vault
     schedule:
       interval: weekly
+
+  - package-ecosystem: cargo
+    directory: /crates/client/api
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: cargo
+    directory: /crates/server
+    schedule:
+      interval: weekly

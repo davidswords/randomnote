@@ -1,0 +1,26 @@
+[package]
+name = "randomtask-api"
+version = "0.1.0"
+edition = "2024"
+description = "The app's client for the randomtask server at api.randomtask.ch, following the Standard Notes protocol"
+license = "GPL-3.0-only"
+
+[dependencies]
+base64 = "0.23"
+getrandom = "0.4"
+hex = "0.4"
+randomtask-crypto = { version = "0.1.0", path = "../crypto" }
+reqwest = { version = "0.13", features = ["json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.11"
+
+[dev-dependencies]
+axum = "0.8"
+randomtask-server = { version = "0.1.0", path = "../../server" }
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
+
+# bcrypt on the test server is deliberately slow; optimise dependencies even in test builds.
+[profile.dev.package."*"]
+opt-level = 3
