@@ -103,6 +103,10 @@ No server yet. On first launch the user creates an account with an **email and p
 - **Unlocking:** a wrong password shows "Wrong password" and unlocks nothing. It's detected when the stored items key fails to decrypt.
 - **Tasks from before 0.3.0 start fresh:** they were stored as plain text (randomnote 0.2.0's data folder, and randomtask 0.2.1's `tasks.db`), so on launch randomtask deletes them rather than migrating them. Deleting can't guarantee the old bytes are gone from an SSD, which is another reason to use full-disk encryption.
 
+## No account needed (0.4)
+
+Still no server. The app opens straight into the task list, storing tasks unencrypted, with a notice that they aren't encrypted. Creating a free account from the notice or the account menu (bottom left) creates it on the device, encrypts the existing tasks and wipes the unencrypted copies from the database file. After that, each launch asks for the password, as in 0.3.
+
 ## Open questions
 
 - **The hosted server.** Write our own, or adapt Standard Notes' open source server? Standard Notes keeps all users' records in one database, so adapting it to a bucket per user would be a significant change.
