@@ -3,7 +3,7 @@
 use std::sync::{Mutex, PoisonError};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::database::{Database, NewUser};
+use crate::database::{Database, NewUser, StoredUser};
 use crate::error::{ServerError, storage};
 use crate::registration::{KeyParams, Registration, VERSION, validate};
 use crate::session::NewSession;
@@ -13,6 +13,10 @@ use crate::sign_in::{
 
 /// bcrypt's cost for the server password, as in Standard Notes.
 const PASSWORD_HASH_COST: u32 = 11;
+/// Failed sign-ins in a row that lock the email, as in Standard Notes.
+const MAX_FAILED_SIGN_INS: i64 = 6;
+/// How long the lock lasts, as in Standard Notes.
+const LOCK_MS: i64 = 60 * 60 * 1000;
 
 /// The current time, in milliseconds since the Unix epoch.
 pub trait Clock: Send + Sync {
@@ -116,19 +120,51 @@ impl Accounts {
         let email =
             randomtask_crypto::normalise_email(&email).ok_or(ServerError::WrongCredentials)?;
         let now = self.clock.now();
+        if self.database().is_locked(&email, now)? {
+            return Err(ServerError::Locked);
+        }
+        match self.check_credentials(&email, &password, &verifier, now) {
+            Err(ServerError::WrongCredentials) => {
+                self.database().record_failed_sign_in(
+                    &email,
+                    MAX_FAILED_SIGN_INS,
+                    now + LOCK_MS,
+                )?;
+                Err(ServerError::WrongCredentials)
+            }
+            Err(error) => Err(error),
+            Ok(user) => {
+                self.database().clear_failed_sign_ins(&email)?;
+                self.start_session(user, now)
+            }
+        }
+    }
+
+    /// The user, if the password and code verifier are right for the email.
+    fn check_credentials(
+        &self,
+        email: &str,
+        password: &str,
+        verifier: &str,
+        now: i64,
+    ) -> Result<StoredUser, ServerError> {
         let user = {
             let database = self.database();
             let user = database
-                .find_user(&email)?
+                .find_user(email)?
                 .ok_or(ServerError::WrongCredentials)?;
-            if !database.take_code_challenge(&code_challenge(&verifier), &user.uuid, now)? {
+            if !database.take_code_challenge(&code_challenge(verifier), &user.uuid, now)? {
                 return Err(ServerError::WrongCredentials);
             }
             user
         };
-        if !bcrypt::verify(&password, &user.encrypted_password).map_err(storage)? {
+        if !bcrypt::verify(password, &user.encrypted_password).map_err(storage)? {
             return Err(ServerError::WrongCredentials);
         }
+        Ok(user)
+    }
+
+    fn start_session(&self, user: StoredUser, now: i64) -> Result<SignedIn, ServerError> {
         let session = NewSession::start(now);
         self.database().insert_session(&user.uuid, &session, now)?;
         Ok(SignedIn {

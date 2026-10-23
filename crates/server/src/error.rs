@@ -15,6 +15,8 @@ pub enum ServerError {
     IncompleteSignIn,
     /// A wrong email, password or code verifier, which are never told apart.
     WrongCredentials,
+    /// Too many failed sign-ins in a row for this email.
+    Locked,
     /// The database failed. The detail is logged, never shown.
     Storage(String),
 }
@@ -32,6 +34,7 @@ impl fmt::Display for ServerError {
             Self::MissingCodeChallenge => "Please provide the code challenge parameter.",
             Self::IncompleteSignIn => "Invalid login credentials.",
             Self::WrongCredentials => "Invalid email or password",
+            Self::Locked => "Too many failed sign-ins. Please try again in an hour.",
             Self::Storage(_) => "Something went wrong. Please try again.",
         })
     }

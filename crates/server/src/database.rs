@@ -33,6 +33,11 @@ const SCHEMA: &str = "
         user_uuid TEXT NOT NULL REFERENCES users (uuid),
         expires_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS failed_sign_ins (
+        email TEXT PRIMARY KEY,
+        failures INTEGER NOT NULL,
+        locked_until INTEGER NOT NULL
+    );
 ";
 
 pub struct Database {
@@ -160,6 +165,53 @@ impl Database {
             )
             .optional()
             .map(|in_date| in_date == Some(true))
+            .map_err(storage)
+    }
+}
+
+impl Database {
+    /// Whether sign-in is locked for the email at `now`.
+    pub(crate) fn is_locked(&self, email: &str, now: i64) -> Result<bool, ServerError> {
+        self.connection
+            .query_row(
+                "SELECT locked_until > ?2 FROM failed_sign_ins WHERE email = ?1",
+                params![email, now],
+                |row| row.get(0),
+            )
+            .optional()
+            .map(|locked| locked == Some(true))
+            .map_err(storage)
+    }
+
+    /// Counts a failed sign-in, and once there are `limit` in a row, locks the
+    /// email until `locked_until` and starts counting again.
+    pub(crate) fn record_failed_sign_in(
+        &self,
+        email: &str,
+        limit: i64,
+        locked_until: i64,
+    ) -> Result<(), ServerError> {
+        self.connection
+            .execute(
+                "INSERT INTO failed_sign_ins (email, failures, locked_until) VALUES (?1, 1, 0)
+                 ON CONFLICT (email) DO UPDATE SET failures = failures + 1",
+                [email],
+            )
+            .and_then(|_| {
+                self.connection.execute(
+                    "UPDATE failed_sign_ins SET failures = 0, locked_until = ?3
+                     WHERE email = ?1 AND failures >= ?2",
+                    params![email, limit, locked_until],
+                )
+            })
+            .map(drop)
+            .map_err(storage)
+    }
+
+    pub(crate) fn clear_failed_sign_ins(&self, email: &str) -> Result<(), ServerError> {
+        self.connection
+            .execute("DELETE FROM failed_sign_ins WHERE email = ?1", [email])
+            .map(drop)
             .map_err(storage)
     }
 }

@@ -99,6 +99,7 @@ impl IntoResponse for ServerError {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
             Self::IncompleteSignIn | Self::WrongCredentials => StatusCode::UNAUTHORIZED,
+            Self::Locked => StatusCode::LOCKED,
             _ => StatusCode::BAD_REQUEST,
         };
         let body = match self {
