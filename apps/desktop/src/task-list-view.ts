@@ -7,6 +7,7 @@ import {
 } from "@randomnote/core";
 
 const EMPTY_TITLE_MESSAGE = "A task needs a title.";
+const SAVE_FAILED_MESSAGE = "Couldn't save the task. Please try again.";
 
 /** Shows the saved tasks in `root`, with a field for adding new ones. */
 export async function showTaskList(
@@ -35,8 +36,10 @@ export async function showTaskList(
       message.textContent = "";
       await refresh();
     } catch (error) {
-      if (!(error instanceof InvalidTaskTitleError)) throw error;
-      message.textContent = EMPTY_TITLE_MESSAGE;
+      message.textContent =
+        error instanceof InvalidTaskTitleError
+          ? EMPTY_TITLE_MESSAGE
+          : SAVE_FAILED_MESSAGE;
     }
   });
 
@@ -47,8 +50,9 @@ function renderTasks(list: HTMLUListElement, tasks: Task[]): void {
   list.replaceChildren(...oldestFirst(tasks).map(taskItem));
 }
 
+/** IDs are UUID v7, which sort by creation time, and are never equal. */
 function oldestFirst(tasks: Task[]): Task[] {
-  return [...tasks].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  return [...tasks].sort((a, b) => (a.id < b.id ? -1 : 1));
 }
 
 function taskItem(task: Task): HTMLLIElement {

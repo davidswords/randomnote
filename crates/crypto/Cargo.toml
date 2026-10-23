@@ -1,0 +1,20 @@
+[package]
+name = "randomnote-crypto"
+version = "0.1.0"
+edition = "2024"
+description = "Encryption for randomnote, following the Standard Notes 004 protocol"
+license = "GPL-3.0-only"
+
+[dependencies]
+argon2 = "0.6"
+base64 = "0.23"
+chacha20poly1305 = "0.11"
+getrandom = "0.4"
+hex = "0.4"
+serde_json = "1"
+sha2 = "0.11"
+zeroize = { version = "1", features = ["zeroize_derive"] }
+
+# Argon2 is deliberately slow; optimise dependencies even in test builds.
+[profile.dev.package."*"]
+opt-level = 3

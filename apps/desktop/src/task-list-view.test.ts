@@ -29,13 +29,14 @@ async function add(title: string) {
 }
 
 describe("task list view", () => {
-  it("shows the saved tasks, oldest first", async () => {
+  it("shows the saved tasks oldest first, whatever order storage returns", async () => {
     await repository.save({ id: "task-2", title: "Call the dentist" });
+    await repository.save({ id: "task-3", title: "Pay rent" });
     await repository.save({ id: "task-1", title: "Buy milk" });
 
     await open();
 
-    expect(shownTitles()).toEqual(["Buy milk", "Call the dentist"]);
+    expect(shownTitles()).toEqual(["Buy milk", "Call the dentist", "Pay rent"]);
   });
 
   it("shows titles as plain text, not HTML", async () => {
@@ -70,6 +71,18 @@ describe("task list view", () => {
 
     expect(message()).toBe("A task needs a title.");
     expect(await repository.list()).toEqual([]);
+  });
+
+  it("says the task couldn't be saved, and keeps the title, when storage fails", async () => {
+    repository.save = async () => {
+      throw new Error("disk full");
+    };
+    await open();
+
+    await add("Buy milk");
+
+    expect(message()).toBe("Couldn't save the task. Please try again.");
+    expect(titleField().value).toBe("Buy milk");
   });
 
   it("clears the message once a task is added", async () => {
