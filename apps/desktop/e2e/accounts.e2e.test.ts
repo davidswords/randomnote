@@ -5,9 +5,12 @@ import {
   PASSWORD,
   addTask,
   enterPassword,
+  openSignUp,
   shownMessage,
   shownTitles,
   signUp,
+  submitSignUp,
+  waitForTaskList,
 } from "./user";
 
 let driver: AppDriver;
@@ -23,34 +26,51 @@ afterEach(async () => {
 const contains = (file: Buffer, text: string) => file.includes(Buffer.from(text, "utf8"));
 
 describe("accounts", () => {
-  it("asks a new user to create an account, then shows their empty task list", async () => {
+  it("opens straight into an empty task list, saying the tasks aren't encrypted", async () => {
     const app = await driver.launch();
 
-    await signUp(app);
+    await waitForTaskList(app);
 
     expect(await shownTitles(app)).toEqual([]);
+    expect(await app.$('[role="status"]').getText()).toContain(
+      "Your tasks aren't encrypted. Create a free account to secure them.",
+    );
+  });
+
+  it("keeps the tasks when an account is created, and asks for the password next time", async () => {
+    const firstRun = await driver.launch();
+    await waitForTaskList(firstRun);
+    await addTask(firstRun, "Buy milk");
+
+    await signUp(firstRun);
+
+    expect(await shownTitles(firstRun)).toEqual(["Buy milk"]);
+    expect(await firstRun.$('[role="status"]').isExisting()).toBe(false);
+    await driver.quit(firstRun);
+    const secondRun = await driver.launch();
+    await enterPassword(secondRun, PASSWORD);
+    await waitForTaskList(secondRun);
+    expect(await shownTitles(secondRun)).toEqual(["Buy milk"]);
   });
 
   it("refuses a password shorter than 12 characters at sign-up", async () => {
     const app = await driver.launch();
-    await app.$('input[aria-label="Email"]').setValue(EMAIL);
-    await app.$('input[aria-label="Password"]').setValue("short");
-    await app.$('input[aria-label="Confirm password"]').setValue("short");
+    await openSignUp(app);
 
-    await app.$("button=Create account").click();
+    await submitSignUp(app, EMAIL, "short");
 
-    expect(await shownMessage(app)).toBe("The password must be at least 12 characters.");
+    expect(await shownMessage(app, '[role="dialog"]')).toBe(
+      "The password must be at least 12 characters.",
+    );
   });
 
   it("refuses an invalid email at sign-up", async () => {
     const app = await driver.launch();
-    await app.$('input[aria-label="Email"]').setValue("david");
-    await app.$('input[aria-label="Password"]').setValue(PASSWORD);
-    await app.$('input[aria-label="Confirm password"]').setValue(PASSWORD);
+    await openSignUp(app);
 
-    await app.$("button=Create account").click();
+    await submitSignUp(app, "david", PASSWORD);
 
-    expect(await shownMessage(app)).toBe("Enter a valid email address.");
+    expect(await shownMessage(app, '[role="dialog"]')).toBe("Enter a valid email address.");
   });
 
   it("stays locked with the wrong password, and opens with the right one", async () => {
@@ -61,27 +81,29 @@ describe("accounts", () => {
     const secondRun = await driver.launch();
 
     await enterPassword(secondRun, "incorrect horse battery");
-    await secondRun.waitUntil(async () => (await shownMessage(secondRun)) !== "");
 
     expect(await shownMessage(secondRun)).toBe("Wrong password");
     expect(await secondRun.$('[aria-label="Tasks"]').isExisting()).toBe(false);
 
     await enterPassword(secondRun, PASSWORD);
-    await secondRun.$('[aria-label="Tasks"]').waitForExist();
+    await waitForTaskList(secondRun);
 
     expect(await shownTitles(secondRun)).toEqual(["Buy milk"]);
   });
 
-  it("writes no task title or password to disk in plain text", async () => {
+  it("leaves no task title or password on disk in plain text once secured", async () => {
     const app = await driver.launch();
-    await signUp(app);
+    await waitForTaskList(app);
     await addTask(app, "Buy oat milk for the office");
+    await signUp(app);
+    await addTask(app, "Book the dentist for Tuesday");
     await driver.quit(app);
 
     const files = driver.dataFiles();
 
     expect(files.length).toBeGreaterThan(0);
-    expect(files.filter((file) => contains(file, "Buy oat milk for the office"))).toEqual([]);
-    expect(files.filter((file) => contains(file, PASSWORD))).toEqual([]);
+    for (const secret of ["Buy oat milk for the office", "Book the dentist for Tuesday", PASSWORD]) {
+      expect(files.filter((file) => contains(file, secret))).toEqual([]);
+    }
   });
 });
