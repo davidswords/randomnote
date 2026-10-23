@@ -42,7 +42,7 @@ npm run dev
 
 ### The server
 
-The server for api.randomtask.ch is in [`crates/server`](crates/server). The app doesn't talk to it yet; for now you can run it and try its API. The easiest way is [Docker](https://docs.docker.com/get-docker/):
+The server for api.randomtask.ch is in [`crates/server`](crates/server). It isn't hosted yet, so released apps keep accounts on the device. You can run it yourself and point the app at it. The easiest way is [Docker](https://docs.docker.com/get-docker/):
 
 ```
 docker compose up --build
@@ -64,6 +64,16 @@ Without Docker, run it with Rust:
 cd crates/server
 cargo run
 ```
+
+### The app with the server
+
+With the server running, start the app pointed at it:
+
+```
+RANDOMTASK_SERVER=http://127.0.0.1:8080 npm run dev
+```
+
+Creating a free account then registers it with the server first, and fails with a message if the server can't be reached. Unlocking an account made without a server registers it too. Tasks themselves stay on the device until sync is built.
 
 ### The checks CI runs
 

@@ -125,7 +125,10 @@ Our own server in Rust, in `crates/server`, at the paths and in the formats the 
   - **Signing up:** `prepare_account` derives the new account's keys without storing anything. The app registers with them, and `create_registered_account` stores the account and its session together. If the server can't be reached, nothing is stored.
   - **Device-only accounts** (from 0.3 and 0.4): once unlocked, `pending_registration` gives the app what it needs to register them. That's the key params and the server password, which the vault keeps in memory only while unlocked.
   - **The session** is stored encrypted under the items key, like a task, so its tokens can't be read from disk.
-- **Next:** the desktop app wiring this up: registering on sign-up and after unlocking, once the server is hosted.
+- **The desktop app** registers with the server set in `RANDOMTASK_SERVER`. Without it, as in releases until api.randomtask.ch is hosted, accounts stay on the device.
+  - **Signing up** registers first, and stores nothing if the server refuses or can't be reached. The user sees the server's message.
+  - **Unlocking** registers a device-only account. If the email is already registered with the same keys, as when an earlier registration's session was lost, it signs in instead. If registering fails for any reason, unlocking still succeeds and the next unlock tries again.
+- **Next:** hosting the server at api.randomtask.ch, then subscription and sync.
 
 ## Open questions
 
