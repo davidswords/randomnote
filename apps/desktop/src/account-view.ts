@@ -21,13 +21,13 @@ export async function showAccountScreen(
 }
 
 function showSignUp(root: HTMLElement, accounts: Accounts, onUnlocked: () => unknown) {
-  const username = input("Username", "text");
+  const email = input("Email", "email");
   const password = input("Password", "password");
   const confirmation = input("Confirm password", "password");
   const warning = document.createElement("p");
   warning.textContent = WARNING;
   const { form, message } = accountForm(root, "Create account", [
-    username,
+    email,
     password,
     confirmation,
     warning,
@@ -36,7 +36,7 @@ function showSignUp(root: HTMLElement, accounts: Accounts, onUnlocked: () => unk
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const values = {
-      username: username.value,
+      email: email.value,
       password: password.value,
       confirmation: confirmation.value,
     };
@@ -46,7 +46,7 @@ function showSignUp(root: HTMLElement, accounts: Accounts, onUnlocked: () => unk
       return;
     }
     await attempt(message, async () => {
-      await accounts.createAccount(values.username.trim(), values.password);
+      await accounts.createAccount(values.email, values.password);
       onUnlocked();
     });
   });
@@ -81,6 +81,8 @@ async function attempt(message: HTMLElement, action: () => Promise<void>) {
 
 function accountForm(root: HTMLElement, action: string, children: HTMLElement[]) {
   const form = document.createElement("form");
+  // The app checks the fields itself, so it can explain each problem.
+  form.noValidate = true;
   const message = document.createElement("p");
   message.setAttribute("role", "alert");
   const button = document.createElement("button");
@@ -91,7 +93,7 @@ function accountForm(root: HTMLElement, action: string, children: HTMLElement[])
   return { form, message };
 }
 
-function input(label: string, type: "text" | "password"): HTMLInputElement {
+function input(label: string, type: "email" | "password"): HTMLInputElement {
   const field = document.createElement("input");
   field.type = type;
   field.setAttribute("aria-label", label);

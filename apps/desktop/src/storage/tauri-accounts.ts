@@ -9,8 +9,8 @@ export class TauriAccounts implements Accounts {
     return this.invoke<boolean>("has_account");
   }
 
-  async createAccount(username: string, password: string): Promise<void> {
-    await this.call("create_account", { username, password });
+  async createAccount(email: string, password: string): Promise<void> {
+    await this.call("create_account", { email, password });
   }
 
   async unlock(password: string): Promise<void> {

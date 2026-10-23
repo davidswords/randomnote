@@ -4,7 +4,7 @@ const MINIMUM_PASSWORD_CHARACTERS = 12;
 export interface Accounts {
   hasAccount(): Promise<boolean>;
   /** Creates the account and unlocks it. */
-  createAccount(username: string, password: string): Promise<void>;
+  createAccount(email: string, password: string): Promise<void>;
   unlock(password: string): Promise<void>;
 }
 
@@ -14,7 +14,7 @@ export class AccountError extends Error {
 }
 
 export type NewAccount = {
-  username: string;
+  email: string;
   password: string;
   confirmation: string;
 };
@@ -27,13 +27,34 @@ export function checkPassword(password: string): string | undefined {
     : undefined;
 }
 
+/**
+ * The first problem with an email address, or undefined if there is none.
+ * The same rule as the Rust vault's: one `@`, a name before it, and a domain
+ * with a dot inside it, with no spaces. Surrounding spaces are ignored.
+ */
+export function checkEmail(email: string): string | undefined {
+  const trimmed = email.trim();
+  if (trimmed === "") return "Enter your email address.";
+  const [name, ...domains] = trimmed.split("@");
+  const domain = domains.join("@");
+  const valid =
+    name !== "" &&
+    domains.length === 1 &&
+    domain.includes(".") &&
+    !domain.startsWith(".") &&
+    !domain.endsWith(".") &&
+    !/\s/.test(trimmed);
+  return valid ? undefined : "Enter a valid email address.";
+}
+
 /** The first problem with a sign-up form, or undefined if there is none. */
 export function checkNewAccount({
-  username,
+  email,
   password,
   confirmation,
 }: NewAccount): string | undefined {
-  if (username.trim() === "") return "Choose a username.";
+  const emailProblem = checkEmail(email);
+  if (emailProblem) return emailProblem;
   if (password !== confirmation) return "The passwords don't match.";
   return checkPassword(password);
 }

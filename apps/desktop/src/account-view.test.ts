@@ -3,6 +3,7 @@ import { AccountError, InMemoryAccounts } from "@randomtask/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { showAccountScreen } from "./account-view";
 
+const EMAIL = "david@example.com";
 const PASSWORD = "correct horse battery staple";
 
 let root: HTMLElement;
@@ -32,14 +33,14 @@ async function submit(values: Record<string, string>) {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-const signUp = (username: string, password: string, confirmation: string) =>
-  submit({ Username: username, Password: password, "Confirm password": confirmation });
+const signUp = (email: string, password: string, confirmation: string) =>
+  submit({ Email: email, Password: password, "Confirm password": confirmation });
 
 describe("account screen without an account", () => {
-  it("asks for a username and the password twice, hiding the passwords", async () => {
+  it("asks for an email and the password twice, hiding the passwords", async () => {
     await open();
 
-    expect(field("Username")!.type).toBe("text");
+    expect(field("Email")!.type).toBe("email");
     expect(field("Password")!.type).toBe("password");
     expect(field("Confirm password")!.type).toBe("password");
     expect(button()!.textContent).toBe("Create account");
@@ -56,28 +57,22 @@ describe("account screen without an account", () => {
   it("creates the account and opens the app", async () => {
     await open();
 
-    await signUp("david", PASSWORD, PASSWORD);
+    await signUp(EMAIL, PASSWORD, PASSWORD);
 
     expect(await accounts.hasAccount()).toBe(true);
     expect(unlockedCount).toBe(1);
   });
 
-  it("trims spaces around the username", async () => {
-    let createdFor = "";
-    accounts.createAccount = async (username) => {
-      createdFor = username;
-    };
+  it("leaves its own checks to the app, so it can explain an invalid email", async () => {
     await open();
 
-    await signUp("  david ", PASSWORD, PASSWORD);
-
-    expect(createdFor).toBe("david");
+    expect(field("Email")!.form!.noValidate).toBe(true);
   });
 
   it("explains a problem with the form and creates nothing", async () => {
     await open();
 
-    await signUp("david", PASSWORD, "something else entirely");
+    await signUp(EMAIL, PASSWORD, "something else entirely");
 
     expect(message()).toBe("The passwords don't match.");
     expect(await accounts.hasAccount()).toBe(false);
@@ -90,7 +85,7 @@ describe("account screen without an account", () => {
     };
     await open();
 
-    await signUp("david", PASSWORD, PASSWORD);
+    await signUp(EMAIL, PASSWORD, PASSWORD);
 
     expect(message()).toBe("An account already exists on this device.");
     expect(unlockedCount).toBe(0);
@@ -102,7 +97,7 @@ describe("account screen without an account", () => {
     };
     await open();
 
-    await signUp("david", PASSWORD, PASSWORD);
+    await signUp(EMAIL, PASSWORD, PASSWORD);
 
     expect(message()).toBe("Something went wrong. Please try again.");
   });
@@ -110,13 +105,13 @@ describe("account screen without an account", () => {
 
 describe("account screen with an account", () => {
   beforeEach(async () => {
-    await accounts.createAccount("david", PASSWORD);
+    await accounts.createAccount(EMAIL, PASSWORD);
   });
 
   it("asks only for the password, hiding it", async () => {
     await open();
 
-    expect(field("Username")).toBeNull();
+    expect(field("Email")).toBeNull();
     expect(field("Confirm password")).toBeNull();
     expect(field("Password")!.type).toBe("password");
     expect(button()!.textContent).toBe("Unlock");
