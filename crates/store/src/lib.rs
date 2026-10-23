@@ -1,5 +1,9 @@
 //! SQLite storage for randomtask.
 
+mod encrypted;
+
+pub use encrypted::{Account, EncryptedStore, StoredItem, StoredItemsKey};
+
 use std::path::Path;
 
 use rusqlite::{Connection, OptionalExtension, Row, params};
