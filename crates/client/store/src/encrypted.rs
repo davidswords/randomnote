@@ -1,5 +1,6 @@
 //! Storage for the app's data. Once an account exists, everything here is
 //! encrypted apart from the account's key parameters, which aren't secret.
+//! That includes the server session, so its tokens can't be read from disk.
 //! Before that, tasks are kept unencrypted, as nothing can encrypt them yet.
 
 use std::path::Path;
@@ -63,6 +64,13 @@ impl EncryptedStore {
             ) STRICT;
             CREATE TABLE IF NOT EXISTS items (
                 id TEXT PRIMARY KEY NOT NULL,
+                items_key_id TEXT NOT NULL,
+                enc_item_key TEXT NOT NULL,
+                content TEXT NOT NULL
+            ) STRICT;
+            CREATE TABLE IF NOT EXISTS session (
+                singleton INTEGER PRIMARY KEY,
+                id TEXT NOT NULL,
                 items_key_id TEXT NOT NULL,
                 enc_item_key TEXT NOT NULL,
                 content TEXT NOT NULL
@@ -139,6 +147,36 @@ impl EncryptedStore {
             .prepare("SELECT id, items_key_id, enc_item_key, content FROM items")?
             .query_map([], item_from_row)?
             .collect()
+    }
+
+    /// Saves the encrypted server session, replacing any earlier one.
+    pub fn save_session(&self, session: &StoredItem) -> rusqlite::Result<()> {
+        self.connection.execute(
+            "INSERT INTO session (singleton, id, items_key_id, enc_item_key, content)
+             VALUES (1, ?1, ?2, ?3, ?4)
+             ON CONFLICT (singleton) DO UPDATE SET
+                id = excluded.id,
+                items_key_id = excluded.items_key_id,
+                enc_item_key = excluded.enc_item_key,
+                content = excluded.content",
+            params![
+                session.id,
+                session.items_key_id,
+                session.enc_item_key,
+                session.content
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn session(&self) -> rusqlite::Result<Option<StoredItem>> {
+        self.connection
+            .query_row(
+                "SELECT id, items_key_id, enc_item_key, content FROM session",
+                [],
+                item_from_row,
+            )
+            .optional()
     }
 
     /// Saves a task kept before the account exists, replacing any with the same ID.
