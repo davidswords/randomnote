@@ -3,6 +3,7 @@ mod commands;
 
 use std::error::Error;
 use std::fs;
+use std::io;
 use std::path::Path;
 
 pub use app::run;
@@ -10,6 +11,9 @@ pub use commands::VaultState;
 use randomtask_store::EncryptedStore;
 use randomtask_vault::Vault;
 use tauri::{Builder, Runtime};
+
+/// The bundle ID the app had as randomnote, up to 0.2.0, which named its data directory.
+const RANDOMNOTE_BUNDLE_ID: &str = "engineering.swords.randomnote";
 
 /// Registers the commands the web view uses to reach the account and its tasks.
 pub fn with_commands<R: Runtime>(builder: Builder<R>) -> Builder<R> {
@@ -29,4 +33,14 @@ pub fn open_vault(data_directory: &Path) -> Result<Vault, Box<dyn Error>> {
     fs::create_dir_all(data_directory)?;
     let store = EncryptedStore::open(&data_directory.join("randomtask.db"))?;
     Ok(Vault::new(store))
+}
+
+/// Deletes the data randomnote 0.2.0 kept in plain text, in the directory
+/// beside `data_directory` named after randomnote's bundle ID. Does nothing if
+/// it isn't there.
+pub fn remove_randomnote_data(data_directory: &Path) -> io::Result<()> {
+    match fs::remove_dir_all(data_directory.with_file_name(RANDOMNOTE_BUNDLE_ID)) {
+        Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(()),
+        result => result,
+    }
 }
