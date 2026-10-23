@@ -117,7 +117,8 @@ Our own server in Rust, in `crates/server`, at the paths and in the formats the 
 - **Errors** are JSON, `{"error": {"message": "..."}}`, with messages written for the user. A storage failure doesn't reveal its detail.
 - **Key parameters:** `POST /v2/login-params` with the email and a PKCE code challenge gives the identifier, seed and version. The challenge is stored for an hour, as in Standard Notes. An email with no account gets made-up parameters, the same every time (the seed is the SHA-256 of the email and a server secret), so a stranger can't tell whether an account exists. Unlike Standard Notes, the made-up version is always `004`, the only one we support.
 - **Signing in:** `POST /v2/login` with the email, the server password and the code verifier. The challenge must be base64url (no padding) of the hex SHA-256 of the verifier, as Standard Notes' client makes it, and each challenge works once, even if the password was wrong. A wrong email, password or verifier all get the same answer, "Invalid email or password", with a 401. Signing in starts a new session.
-- **Next:** locking an account after 6 failed sign-ins for an hour (Standard Notes' sample configuration), refreshing and signing out, then the app using the server.
+- **Locking:** six failed sign-ins in a row lock the email for an hour, with a 423 and "Too many failed sign-ins. Please try again in an hour.", even for the right password. These are the values in Standard Notes' sample configuration. A successful sign-in starts the count again. The lock is kept by email, not by account, so an unknown email is locked the same way and the lock doesn't reveal which emails have accounts. Unlike Standard Notes, there's no captcha to get past the lock early.
+- **Next:** refreshing and signing out, then the app using the server.
 
 ## Open questions
 
