@@ -16,16 +16,16 @@ updates:
       interval: weekly
 
   - package-ecosystem: cargo
-    directory: /crates/store
+    directory: /crates/client/store
     schedule:
       interval: weekly
 
   - package-ecosystem: cargo
-    directory: /crates/crypto
+    directory: /crates/client/crypto
     schedule:
       interval: weekly
 
   - package-ecosystem: cargo
-    directory: /crates/vault
+    directory: /crates/client/vault
     schedule:
       interval: weekly

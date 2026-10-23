@@ -103,7 +103,8 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Passwords** are typed twice at sign-up and are at least 12 characters.
 - **Unencrypted tasks from versions before 0.3.0 are deleted on launch,** not migrated.
 - **Sync can be switched off, uploads can be size-limited, and storage is flexible,** with S3-compatible storage as the likely default.
-- **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.
+- **The Rust is split by where it runs:** `crates/client` holds what runs on people's devices (the desktop, web, iOS and Android apps), and `crates/server` holds what runs at api.randomtask.ch.
+- **Local storage is SQLite, accessed from Rust** with rusqlite and a bundled SQLite, in the `crates/client/store` crate. It was chosen for performance: queries, and later decryption, run natively, and only results cross into the web view.
 
 ## Open questions
 

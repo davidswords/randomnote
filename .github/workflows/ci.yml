@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: crates/store
+        working-directory: crates/client/store
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -160,7 +160,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: crates/crypto
+        working-directory: crates/client/crypto
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -178,7 +178,7 @@ jobs:
     timeout-minutes: 20
     defaults:
       run:
-        working-directory: crates/vault
+        working-directory: crates/client/vault
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -261,7 +261,7 @@ jobs:
           COMMAND: ${{ matrix.command }}
           TARGETS: ${{ matrix.targets }}
         run: |
-          for crate in crates/crypto crates/store crates/vault; do
+          for crate in crates/client/crypto crates/client/store crates/client/vault; do
             if [ -z "$TARGETS" ]; then
               (cd "$crate" && cargo "$COMMAND" --locked)
             else
