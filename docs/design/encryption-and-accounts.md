@@ -128,7 +128,8 @@ Our own server in Rust, in `crates/server`, at the paths and in the formats the 
 - **The desktop app** registers with the server set in `RANDOMTASK_SERVER`. Without it, as in releases until api.randomtask.ch is hosted, accounts stay on the device.
   - **Signing up** registers first, and stores nothing if the server refuses or can't be reached. The user sees the server's message.
   - **Unlocking** registers a device-only account. If the email is already registered with the same keys, as when an earlier registration's session was lost, it signs in instead. If registering fails for any reason, unlocking still succeeds and the next unlock tries again.
-- **Next:** hosting the server at api.randomtask.ch, then subscription and sync.
+- **The web app** calls the server from the browser, so the server allows the origins listed in `RANDOMTASK_ALLOWED_ORIGINS` (CORS): `POST`, with `Content-Type` and `Authorization`. With none listed, browsers keep other pages from reading its responses.
+- **Next:** the web app, then hosting the server at api.randomtask.ch, then subscription and sync.
 
 ## Open questions
 

@@ -100,6 +100,8 @@ Product and technical decisions for randomtask. Add to this file when a decision
   - **A free account** (email and password) is registered with the randomtask server and encrypts the device's data. The same account works on every device and in the browser.
   - **A subscription** turns on sync.
 - **The account menu sits at the bottom of the sidebar,** as in Standard Notes, with *Create free account*, *Sign in*, *Import*, *Help* and the version. A dismissible notice says when data isn't backed up, with a *Sign up to sync* button.
+- **The web app stores data with SQLite compiled to WebAssembly,** in the browser's private file storage (OPFS), using the same store and schema as the desktop app.
+- **The web app works without an account,** exactly as the desktop app does: it opens empty, keeps tasks unencrypted in the browser, and offers a free account to secure them.
 - **One implementation for desktop and web:** the same frontend and the same Rust core, run by Tauri on the desktop and compiled to WebAssembly in the browser. The web version is the site people reach.
 - **Passwords** are typed twice at sign-up and are at least 12 characters.
 - **Unencrypted tasks from versions before 0.3.0 are deleted on launch,** not migrated.
@@ -117,6 +119,5 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
 - The server: where it's hosted, and whether emails are verified.
-- Browser storage for the web version: SQLite compiled to WebAssembly, or IndexedDB.
 - Pricing details: the price (around $3 a month or $30 a year was suggested), the length of the free trial, and which merchant of record.
 - Whether the repository stays public.

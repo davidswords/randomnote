@@ -4,18 +4,33 @@ use std::sync::Arc;
 
 use axum::extract::State;
 use axum::extract::rejection::JsonRejection;
-use axum::http::header::AUTHORIZATION;
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::header::InvalidHeaderValue;
+use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
+use axum::http::{HeaderMap, HeaderValue, Method, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::post;
 use axum::{Json, Router};
 use serde_json::{Map, Value, json};
+use tower_http::cors::CorsLayer;
 
 use crate::accounts::{Accounts, SignedIn};
 use crate::error::ServerError;
 use crate::registration::{KeyParams, Registration};
 use crate::session::{NewSession, Refresh};
 use crate::sign_in::{KeyParamsRequest, SignIn};
+
+/// Lets web pages at `origins`, such as the web app, call the server from the
+/// browser. Without any, browsers keep pages elsewhere from reading responses.
+pub fn cors(origins: &[&str]) -> Result<CorsLayer, InvalidHeaderValue> {
+    let origins = origins
+        .iter()
+        .map(|origin| HeaderValue::from_str(origin))
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(CorsLayer::new()
+        .allow_origin(origins)
+        .allow_methods([Method::POST])
+        .allow_headers([CONTENT_TYPE, AUTHORIZATION]))
+}
 
 pub fn router(accounts: Accounts) -> Router {
     Router::new()

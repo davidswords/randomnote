@@ -281,6 +281,11 @@ jobs:
             os: ubuntu-latest
             command: check
             targets: aarch64-linux-android x86_64-linux-android
+          - name: web
+            os: ubuntu-latest
+            command: check
+            targets: wasm32-unknown-unknown
+            crates: crates/client/api
     defaults:
       run:
         shell: bash
@@ -308,8 +313,9 @@ jobs:
         env:
           COMMAND: ${{ matrix.command }}
           TARGETS: ${{ matrix.targets }}
+          EXTRA_CRATES: ${{ matrix.crates }}
         run: |
-          for crate in crates/client/crypto crates/client/store crates/client/vault; do
+          for crate in crates/client/crypto crates/client/store crates/client/vault $EXTRA_CRATES; do
             if [ -z "$TARGETS" ]; then
               (cd "$crate" && cargo "$COMMAND" --locked)
             else

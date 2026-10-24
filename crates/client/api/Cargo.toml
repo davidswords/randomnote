@@ -24,3 +24,7 @@ tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
 # bcrypt on the test server is deliberately slow; optimise dependencies even in test builds.
 [profile.dev.package."*"]
 opt-level = 3
+
+# In the browser, randomness comes from the Web Crypto API.
+[target.'cfg(all(target_family = "wasm", target_os = "unknown"))'.dependencies]
+getrandom = { version = "0.4", features = ["wasm_js"] }

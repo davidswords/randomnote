@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicI64, Ordering};
 
-use randomtask_server::{Accounts, Clock, Database, router};
+use randomtask_server::{Accounts, Clock, Database, cors, router};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -38,6 +38,11 @@ pub struct TestServer {
 
 impl TestServer {
     pub async fn start() -> Self {
+        Self::start_allowing(&[]).await
+    }
+
+    /// A server that web pages at these origins may call.
+    pub async fn start_allowing(origins: &[&str]) -> Self {
         let directory = tempfile::tempdir().unwrap();
         let database = Database::open(&directory.path().join("server.db")).unwrap();
         let time = Arc::new(AtomicI64::new(NOW));
@@ -45,7 +50,8 @@ impl TestServer {
         let accounts = Accounts::new(database, clock, PSEUDO_KEY.to_owned());
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let url = format!("http://{}", listener.local_addr().unwrap());
-        tokio::spawn(async move { axum::serve(listener, router(accounts)).await.unwrap() });
+        let app = router(accounts).layer(cors(origins).unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
         Self {
             url,
             client: reqwest::Client::new(),
