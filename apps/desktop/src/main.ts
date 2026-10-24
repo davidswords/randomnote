@@ -1,11 +1,9 @@
 import * as tauriApp from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
-import { showAbout } from "./about";
-import { showAccountScreen } from "./account-view";
-import { showApp } from "./app-shell";
+import { showAbout, showAccountScreen, showApp } from "@randomtask/ui";
+import "@randomtask/ui/style.css";
 import { TauriAccounts } from "./storage/tauri-accounts";
 import { TauriTaskRepository } from "./storage/tauri-task-repository";
-import "./style.css";
 
 const app = document.querySelector<HTMLElement>("#app");
 const footer = document.querySelector<HTMLElement>("#about");

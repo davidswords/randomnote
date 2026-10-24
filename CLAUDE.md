@@ -25,7 +25,8 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
 ## Layout
 
 - `packages/core`: domain logic and its tests.
-- `apps/desktop`: the Tauri 2 shell (`src-tauri`) and the Vite + TypeScript frontend (`src`).
+- `packages/ui`: the app's screens and theme, shared by the desktop and web apps. They reach the account and its tasks only through the interfaces in `packages/core`.
+- `apps/desktop`: the Tauri 2 shell (`src-tauri`) and its Vite + TypeScript entry point (`src`), which connects the shared screens to Tauri.
 - `crates/client`: the Rust that runs on people's devices, for the desktop, web, iOS and Android apps. Nothing in it is specific to Tauri, so it builds and tests anywhere.
   - `crates/client/store`: SQLite storage (rusqlite, bundled SQLite).
   - `crates/client/crypto`: encryption following the Standard Notes 004 protocol (Argon2id key derivation, XChaCha20-Poly1305 record encryption, and the items-key hierarchy). Test vectors come from independent reference implementations, never from this crate.
