@@ -1,7 +1,9 @@
 # The web app, served by Caddy, which also forwards the API to the server.
 # Built from the repository root, with the server's address baked in:
 #   docker build -f apps/web/Dockerfile --build-arg RANDOMTASK_SERVER=https://api.randomtask.ch .
-FROM rust:1.97-slim-bookworm AS wasm
+# Trixie, for a clang (19) new enough for SQLite's C23 `[[noreturn]]`;
+# bookworm's clang 14 rejects it.
+FROM rust:1.97-slim-trixie AS wasm
 RUN apt-get update && apt-get install -y --no-install-recommends clang \
     && rm -rf /var/lib/apt/lists/*
 RUN rustup target add wasm32-unknown-unknown \
