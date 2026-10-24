@@ -279,8 +279,11 @@ jobs:
       - name: Build the web app against the test server
         run: npm run build:e2e -w @randomtask/web
 
+      # The runner already has a browser's system libraries, so this skips
+      # --with-deps and the apt mirror, which has hung CI before.
       - name: Install Chromium for Playwright
-        run: npx playwright-core install --with-deps chromium
+        timeout-minutes: 5
+        run: npx playwright-core install chromium
 
       - name: Run end-to-end tests in Chromium
         run: npm run test:e2e -w @randomtask/web
