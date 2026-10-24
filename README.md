@@ -75,6 +75,23 @@ RANDOMTASK_SERVER=http://127.0.0.1:8080 npm run dev
 
 Creating a free account then registers it with the server first, and fails with a message if the server can't be reached. Unlocking an account made without a server registers it too. Tasks themselves stay on the device until sync is built.
 
+### The web app in your browser
+
+The same app runs in the browser, with its Rust compiled to WebAssembly. Besides Node.js and Rust, it needs the WebAssembly target and `wasm-bindgen`, at the version in the lockfile:
+
+```
+rustup target add wasm32-unknown-unknown
+cargo install wasm-bindgen-cli --version 0.2.129 --locked
+```
+
+With the server running (`docker compose up --build`, or `cargo run` in `crates/server`), start the web app:
+
+```
+npm run dev:web
+```
+
+Then open <http://localhost:1430>. It keeps its data in the browser's private storage, separate from the desktop app's, and registers accounts with the server on `127.0.0.1:8080`. To start afresh, clear the site's data in your browser.
+
 ### The checks CI runs
 
 ```
@@ -82,7 +99,7 @@ npm run typecheck
 npm test
 ```
 
-Each Rust crate under [`crates`](crates) and [`apps/desktop/src-tauri`](apps/desktop/src-tauri) has its own tests: run `cargo test` in its directory. [CLAUDE.md](CLAUDE.md) lists every command.
+Each Rust crate under [`crates`](crates) and [`apps/desktop/src-tauri`](apps/desktop/src-tauri) has its own tests: run `cargo test` in its directory. The web app's end-to-end tests run in Chromium against the real server: build the server (`cargo build` in `crates/server`), then `npm run build:e2e -w @randomtask/web` and `npm run test:e2e -w @randomtask/web`. [CLAUDE.md](CLAUDE.md) lists every command.
 
 ## Licence
 

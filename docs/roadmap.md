@@ -9,7 +9,7 @@ The order the core of randomtask is built in. Each stage is built test-first and
 5. **The randomtask server.** In Rust: register and sign in as in Standard Notes, so accounts live on the server. *In progress:* the server registers, signs in, locks after failed sign-ins, refreshes sessions and signs out, and the desktop app registers with it when `RANDOMTASK_SERVER` is set. Next, hosting it at api.randomtask.ch.
 6. **Stay signed in, then quick add from the terminal.** An opt-in "stay signed in on this device" keeps the key in the operating system's keychain. Then `randomtask "find a magnetic phone holder"` adds a task without opening the app, unlocking with the keychain.
 7. **Subscription and sync.** Payment, then sync through the server into the user's own bucket, and restoring on another device.
-8. **The web app.** The same frontend with the Rust core compiled to WebAssembly, as the site people reach.
+8. **The web app.** The same frontend with the Rust core compiled to WebAssembly, as the site people reach. *In progress:* it runs locally with `npm run dev:web`, against the server on this machine.
 9. **Two-way sync, two-factor authentication and recovery,** as in Standard Notes.
 10. **Backups.** A local backup folder (on by default) with restore, then email backups.
 

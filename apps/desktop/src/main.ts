@@ -1,17 +1,19 @@
 import * as tauriApp from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
-import { showAbout } from "./about";
-import { showAccountScreen } from "./account-view";
-import { showApp } from "./app-shell";
-import { TauriAccounts } from "./storage/tauri-accounts";
-import { TauriTaskRepository } from "./storage/tauri-task-repository";
-import "./style.css";
+import {
+  CommandAccounts,
+  CommandTaskRepository,
+  showAbout,
+  showAccountScreen,
+  showApp,
+} from "@randomtask/ui";
+import "@randomtask/ui/style.css";
 
 const app = document.querySelector<HTMLElement>("#app");
 const footer = document.querySelector<HTMLElement>("#about");
 const services = {
-  accounts: new TauriAccounts(invoke),
-  repository: new TauriTaskRepository(invoke),
+  accounts: new CommandAccounts(invoke),
+  repository: new CommandTaskRepository(invoke),
 };
 
 if (footer) {

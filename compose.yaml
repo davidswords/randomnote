@@ -11,7 +11,7 @@ services:
       - "127.0.0.1:8080:8080"
     environment:
       # The web app's dev server, so it can call the server from the browser.
-      RANDOMTASK_ALLOWED_ORIGINS: ${RANDOMTASK_ALLOWED_ORIGINS:-http://localhost:1421}
+      RANDOMTASK_ALLOWED_ORIGINS: ${RANDOMTASK_ALLOWED_ORIGINS:-http://localhost:1430}
     volumes:
       - server-data:/data
     restart: unless-stopped

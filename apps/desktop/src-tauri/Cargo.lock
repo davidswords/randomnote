@@ -3005,6 +3005,8 @@ dependencies = [
  "randomtask-api",
  "randomtask-store",
  "randomtask-vault",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

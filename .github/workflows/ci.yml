@@ -246,6 +246,49 @@ jobs:
       - name: Run tests, requiring 100% line coverage
         run: cargo llvm-cov --locked --fail-under-lines 100 --ignore-filename-regex '(^|/)(app|main)\.rs$'
 
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: rustup target add wasm32-unknown-unknown && rustup component add rustfmt clippy
+
+      - name: Check the WebAssembly app's formatting and lints
+        working-directory: crates/client/web
+        run: |
+          cargo fmt --check
+          cargo clippy --locked --target wasm32-unknown-unknown --all-targets -- -D warnings
+
+      - name: Install wasm-bindgen, matching the version in the lockfile
+        run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
+
+      - name: Build the server
+        working-directory: crates/server
+        run: cargo build --locked
+
+      - run: npm ci
+
+      - name: Build the web app against the test server
+        run: npm run build:e2e -w @randomtask/web
+
+      # The runner comes with Google Chrome, so Playwright drives that rather
+      # than downloading its own Chromium, which has hung here after downloading.
+      - name: Run end-to-end tests in Chrome
+        timeout-minutes: 10
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: |
+          google-chrome --version
+          npm run test:e2e -w @randomtask/web
+
   server-image:
     runs-on: ubuntu-latest
     timeout-minutes: 20

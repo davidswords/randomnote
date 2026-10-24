@@ -1,15 +1,15 @@
 import { accountsContract } from "@randomtask/core/testing";
 import { describe, expect, it } from "vitest";
 import { fakeAccountCommands } from "./fake-account-commands";
-import { TauriAccounts } from "./tauri-accounts";
+import { CommandAccounts } from "./command-accounts";
 
-accountsContract(() => new TauriAccounts(fakeAccountCommands().invoke));
+accountsContract(() => new CommandAccounts(fakeAccountCommands().invoke));
 
-describe("TauriAccounts messages", () => {
+describe("CommandAccounts messages", () => {
   it("checks for an account with has_account", async () => {
     const commands = fakeAccountCommands();
 
-    await new TauriAccounts(commands.invoke).hasAccount();
+    await new CommandAccounts(commands.invoke).hasAccount();
 
     expect(commands.calls).toEqual([{ command: "has_account", args: undefined }]);
   });
@@ -17,7 +17,7 @@ describe("TauriAccounts messages", () => {
   it("creates the account with create_account, passing the email and password", async () => {
     const commands = fakeAccountCommands();
 
-    await new TauriAccounts(commands.invoke).createAccount(
+    await new CommandAccounts(commands.invoke).createAccount(
       "david@example.com",
       "correct horse battery staple",
     );
@@ -32,7 +32,7 @@ describe("TauriAccounts messages", () => {
 
   it("unlocks with unlock, passing the password", async () => {
     const commands = fakeAccountCommands();
-    const accounts = new TauriAccounts(commands.invoke);
+    const accounts = new CommandAccounts(commands.invoke);
     await accounts.createAccount("david@example.com", "correct horse battery staple");
 
     await accounts.unlock("correct horse battery staple");
@@ -45,7 +45,7 @@ describe("TauriAccounts messages", () => {
 });
 
 describe("fake account commands", () => {
-  it("rejects unknown commands, as Tauri does", async () => {
+  it("rejects unknown commands, as Tauri and the worker do", async () => {
     const { invoke } = fakeAccountCommands();
 
     await expect(invoke("delete_everything")).rejects.toBe(

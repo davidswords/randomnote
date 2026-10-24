@@ -3,6 +3,8 @@
 //! desktop app and the web app share it, each adding only its own way for
 //! the interface to call in.
 
+mod commands;
+
 use std::fmt;
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
@@ -89,6 +91,11 @@ impl App {
             self.vault().save_session(&vault_session(session))?;
         }
         Ok(())
+    }
+
+    /// Forgets the keys, so tasks can't be read until the next unlock.
+    pub fn lock(&self) {
+        self.vault().lock();
     }
 
     pub fn save_task(&self, task: &Task) -> Result<(), AppError> {
