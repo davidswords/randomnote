@@ -1,0 +1,29 @@
+{
+  "name": "@randomtask/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:wasm": "cargo build --release --locked --target wasm32-unknown-unknown --manifest-path ../../crates/client/web/Cargo.toml && wasm-bindgen --target web --out-dir src/wasm ../../crates/client/web/target/wasm32-unknown-unknown/release/randomtask_web.wasm",
+    "dev": "npm run build:wasm && vite",
+    "build": "npm run build:wasm && vite build",
+    "build:e2e": "npm run build:wasm && VITE_RANDOMTASK_SERVER=http://127.0.0.1:8181 vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.integration.test.ts'",
+    "test:integration": "vitest run --passWithNoTests .integration.test",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@randomtask/core": "*",
+    "@randomtask/ui": "*"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^5.0.5",
+    "playwright-core": "1.56.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

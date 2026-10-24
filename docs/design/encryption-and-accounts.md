@@ -129,7 +129,8 @@ Our own server in Rust, in `crates/server`, at the paths and in the formats the 
   - **Signing up** registers first, and stores nothing if the server refuses or can't be reached. The user sees the server's message.
   - **Unlocking** registers a device-only account. If the email is already registered with the same keys, as when an earlier registration's session was lost, it signs in instead. If registering fails for any reason, unlocking still succeeds and the next unlock tries again.
 - **The web app** calls the server from the browser, so the server allows the origins listed in `RANDOMTASK_ALLOWED_ORIGINS` (CORS): `POST`, with `Content-Type` and `Authorization`. With none listed, browsers keep other pages from reading its responses.
-- **Next:** the web app, then hosting the server at api.randomtask.ch, then subscription and sync.
+- **The web app** runs the same Rust in a dedicated Web Worker, compiled to WebAssembly. SQLite keeps its database in the browser's private file storage (OPFS), through `sqlite-wasm-vfs`'s sync access handle pool, so the store and schema are the desktop app's. The page and the worker exchange the same commands as the desktop app's Tauri commands, so both apps share their screens and adapters.
+- **Next:** hosting the server at api.randomtask.ch and the web app at randomtask.ch, then subscription and sync.
 
 ## Open questions
 
