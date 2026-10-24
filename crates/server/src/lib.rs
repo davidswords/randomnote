@@ -12,4 +12,4 @@ mod sign_in;
 pub use accounts::{Accounts, Clock, SystemClock};
 pub use database::Database;
 pub use error::ServerError;
-pub use http::router;
+pub use http::{cors, router};

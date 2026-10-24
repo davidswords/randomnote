@@ -2,10 +2,12 @@
 //! `RANDOMTASK_DATABASE` (the SQLite file), `RANDOMTASK_ADDRESS`, and
 //! optionally `RANDOMTASK_PSEUDO_KEY`, the secret that made-up key parameters
 //! for unknown emails come from. Without it, the database keeps its own.
+//! `RANDOMTASK_ALLOWED_ORIGINS` lists, separated by commas, the origins of web
+//! pages that may call the server from a browser, such as the web app's.
 
 use std::path::PathBuf;
 
-use randomtask_server::{Accounts, Database, SystemClock, router};
+use randomtask_server::{Accounts, Database, SystemClock, cors, router};
 
 #[tokio::main]
 async fn main() {
@@ -23,7 +25,11 @@ async fn main() {
         .await
         .expect("the address is free");
     println!("randomtask server listening on {address}");
-    axum::serve(listener, router(accounts))
-        .await
-        .expect("the server runs");
+    let origins = std::env::var("RANDOMTASK_ALLOWED_ORIGINS").unwrap_or_default();
+    let origins: Vec<&str> = origins
+        .split(',')
+        .filter(|origin| !origin.is_empty())
+        .collect();
+    let app = router(accounts).layer(cors(&origins).expect("the allowed origins are valid"));
+    axum::serve(listener, app).await.expect("the server runs");
 }
