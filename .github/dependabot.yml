@@ -39,3 +39,8 @@ updates:
     directory: /crates/server
     schedule:
       interval: weekly
+
+  - package-ecosystem: cargo
+    directory: /crates/client/app
+    schedule:
+      interval: weekly

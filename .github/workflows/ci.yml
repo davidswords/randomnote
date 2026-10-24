@@ -227,6 +227,25 @@ jobs:
       - name: Run tests, requiring 100% line coverage
         run: cargo llvm-cov --locked --fail-under-lines 100 --ignore-filename-regex '(^|/)(app|main)\.rs$'
 
+
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: crates/client/app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - run: rustup component add rustfmt clippy llvm-tools-preview
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo install cargo-llvm-cov --locked
+      - name: Run tests, requiring 100% line coverage
+        run: cargo llvm-cov --locked --fail-under-lines 100 --ignore-filename-regex '(^|/)(app|main)\.rs$'
+
   server-image:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -285,7 +304,7 @@ jobs:
             os: ubuntu-latest
             command: check
             targets: wasm32-unknown-unknown
-            crates: crates/client/api
+            crates: crates/client/api crates/client/app
     defaults:
       run:
         shell: bash
