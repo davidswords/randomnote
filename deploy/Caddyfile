@@ -1,0 +1,23 @@
+# Serves the web app at randomtask.ch and forwards api.randomtask.ch to the
+# server, getting HTTPS certificates for both from Let's Encrypt. The
+# addresses can be overridden, as CI does to try this without the domain.
+{$RANDOMTASK_WEB_ADDRESS:randomtask.ch} {
+	root * /srv
+	encode zstd gzip
+	try_files {path} /index.html
+	file_server
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		X-Frame-Options DENY
+	}
+}
+
+{$RANDOMTASK_WWW_ADDRESS:www.randomtask.ch} {
+	redir https://randomtask.ch{uri} permanent
+}
+
+{$RANDOMTASK_API_ADDRESS:api.randomtask.ch} {
+	reverse_proxy server:8080
+}

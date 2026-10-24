@@ -1,0 +1,52 @@
+name: Images
+
+# Publishes the server and web app images that deploy/compose.yaml runs:
+# tagged `main` from main, and `vX.Y.Z` and `latest` from a release tag.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: images-${{ github.ref }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build the images
+        working-directory: deploy
+        env:
+          RANDOMTASK_TAG: build
+        run: docker compose build
+
+      - name: Sign in to the GitHub container registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+
+      - name: Push the images
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tags="$GITHUB_REF_NAME latest"
+          else
+            tags=main
+          fi
+          for image in server web; do
+            for tag in $tags; do
+              docker tag "ghcr.io/davidswords/randomtask-$image:build" "ghcr.io/davidswords/randomtask-$image:$tag"
+              docker push "ghcr.io/davidswords/randomtask-$image:$tag"
+            done
+          done

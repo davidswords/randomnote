@@ -1,0 +1,41 @@
+# Runs randomtask.ch and api.randomtask.ch on one server, from the images the
+# Images workflow publishes for the latest release (RANDOMTASK_TAG=main runs
+# main instead). On the server, in a copy of this directory:
+#   docker compose pull && docker compose up --detach
+# The database and the HTTPS certificates are kept in volumes.
+services:
+  server:
+    image: ghcr.io/davidswords/randomtask-server:${RANDOMTASK_TAG:-latest}
+    build:
+      context: ../crates
+      dockerfile: server/Dockerfile
+    environment:
+      RANDOMTASK_ALLOWED_ORIGINS: ${RANDOMTASK_ALLOWED_ORIGINS:-https://randomtask.ch}
+    volumes:
+      - server-data:/data
+    restart: unless-stopped
+
+  web:
+    image: ghcr.io/davidswords/randomtask-web:${RANDOMTASK_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      RANDOMTASK_WEB_ADDRESS: ${RANDOMTASK_WEB_ADDRESS:-randomtask.ch}
+      RANDOMTASK_WWW_ADDRESS: ${RANDOMTASK_WWW_ADDRESS:-www.randomtask.ch}
+      RANDOMTASK_API_ADDRESS: ${RANDOMTASK_API_ADDRESS:-api.randomtask.ch}
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  server-data:
+  caddy-data:
+  caddy-config:

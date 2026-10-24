@@ -8,6 +8,7 @@ COPY server server
 RUN cargo build --release --locked --manifest-path server/Cargo.toml
 
 FROM debian:bookworm-slim
+LABEL org.opencontainers.image.source=https://github.com/davidswords/randomtask
 RUN useradd --system randomtask && mkdir /data && chown randomtask /data
 COPY --from=build /src/server/target/release/randomtask-server /usr/local/bin/
 USER randomtask
