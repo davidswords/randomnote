@@ -1,7 +1,7 @@
-//! The account commands with a server configured: signing up registers the
-//! account with the real randomtask server, and unlocking registers accounts
-//! made on the device before there was one. Through Tauri's real IPC, against
-//! a real vault on disk and the real server on a free local port.
+//! The account commands with a server configured, through Tauri's real IPC,
+//! against a real vault on disk and the real server on a free local port.
+//! The app crate tests the rest of what signing up and unlocking do with a
+//! server; these pin that the commands reach it and pass its messages on.
 
 mod support;
 
@@ -120,19 +120,6 @@ fn signing_up_registers_the_account_with_the_server() {
 }
 
 #[test]
-fn signing_up_keeps_the_tasks_made_before() {
-    let server = TestServer::start();
-    let (_directory, path) = database();
-    let app = TestApp::with_server(store(&path), &server.url);
-    let task = json!({ "id": "task-1", "title": "Buy milk" });
-    app.invoke("save_task", json!({ "task": task })).unwrap();
-
-    sign_up(&app).unwrap();
-
-    assert_eq!(app.invoke("list_tasks", json!({})), Ok(json!([task])));
-}
-
-#[test]
 fn signing_up_with_a_taken_email_says_so_and_creates_nothing() {
     let server = TestServer::start();
     let (_first, first_path) = database();
@@ -144,41 +131,6 @@ fn signing_up_with_a_taken_email_says_so_and_creates_nothing() {
 
     assert_eq!(result, Err(json!("This email is already registered.")));
     assert_eq!(app.invoke("has_account", json!({})), Ok(json!(false)));
-}
-
-#[test]
-fn signing_up_without_the_server_says_so_and_leaves_tasks_unencrypted() {
-    let (_directory, path) = database();
-    let app = TestApp::with_server(store(&path), &unreachable_url());
-    let task = json!({ "id": "task-1", "title": "Buy milk" });
-    app.invoke("save_task", json!({ "task": task })).unwrap();
-
-    let result = sign_up(&app);
-
-    assert_eq!(
-        result,
-        Err(json!(
-            "Can't reach the randomtask server. Check your connection and try again."
-        ))
-    );
-    assert_eq!(app.invoke("has_account", json!({})), Ok(json!(false)));
-    assert_eq!(app.invoke("list_tasks", json!({})), Ok(json!([task])));
-}
-
-#[test]
-fn signing_up_checks_the_password_before_calling_the_server() {
-    let (_directory, path) = database();
-    let app = TestApp::with_server(store(&path), &unreachable_url());
-
-    let result = app.invoke(
-        "create_account",
-        json!({ "email": EMAIL, "password": "too short" }),
-    );
-
-    assert_eq!(
-        result,
-        Err(json!("The password must be at least 12 characters."))
-    );
 }
 
 #[test]
@@ -195,91 +147,6 @@ fn unlocking_registers_an_account_made_on_the_device() {
 
     assert_eq!(server.seed_for(EMAIL), local_seed(&path));
     assert!(has_session(&path));
-}
-
-#[test]
-fn unlocking_still_works_when_the_server_cannot_be_reached() {
-    let (_directory, path) = database();
-    TestApp::with_store(store(&path)).create_account().unwrap();
-    let app = TestApp::with_server(store(&path), &unreachable_url());
-
-    assert_eq!(
-        app.invoke("unlock", json!({ "password": PASSWORD })),
-        Ok(Value::Null)
-    );
-
-    assert_eq!(app.invoke("list_tasks", json!({})), Ok(json!([])));
-    assert!(!has_session(&path));
-}
-
-#[test]
-fn unlocking_registers_on_a_later_try_once_the_server_is_back() {
-    let server = TestServer::start();
-    let (_directory, path) = database();
-    TestApp::with_store(store(&path)).create_account().unwrap();
-    TestApp::with_server(store(&path), &unreachable_url())
-        .invoke("unlock", json!({ "password": PASSWORD }))
-        .unwrap();
-    let app = TestApp::with_server(store(&path), &server.url);
-
-    app.invoke("unlock", json!({ "password": PASSWORD }))
-        .unwrap();
-
-    assert_eq!(server.seed_for(EMAIL), local_seed(&path));
-    assert!(has_session(&path));
-}
-
-#[test]
-fn unlocking_signs_in_when_the_account_is_already_registered_with_the_same_keys() {
-    let server = TestServer::start();
-    let (_directory, path) = database();
-    TestApp::with_server(store(&path), &server.url)
-        .create_account()
-        .unwrap();
-    // As if the session were lost after registering, say by a crash.
-    rusqlite::Connection::open(&path)
-        .unwrap()
-        .execute_batch("DELETE FROM session;")
-        .unwrap();
-    let app = TestApp::with_server(store(&path), &server.url);
-
-    app.invoke("unlock", json!({ "password": PASSWORD }))
-        .unwrap();
-
-    assert!(has_session(&path));
-}
-
-#[test]
-fn unlocking_leaves_an_account_unregistered_when_its_email_belongs_to_someone_else() {
-    let server = TestServer::start();
-    let (_other, other_path) = database();
-    sign_up(&TestApp::with_server(store(&other_path), &server.url)).unwrap();
-    let (_directory, path) = database();
-    TestApp::with_store(store(&path)).create_account().unwrap();
-    let app = TestApp::with_server(store(&path), &server.url);
-
-    assert_eq!(
-        app.invoke("unlock", json!({ "password": PASSWORD })),
-        Ok(Value::Null)
-    );
-
-    assert!(!has_session(&path));
-    assert_ne!(server.seed_for(EMAIL), local_seed(&path));
-}
-
-#[test]
-fn unlocking_with_the_wrong_password_never_calls_the_server() {
-    let server = TestServer::start();
-    let (_directory, path) = database();
-    TestApp::with_store(store(&path)).create_account().unwrap();
-    let app = TestApp::with_server(store(&path), &server.url);
-
-    assert_eq!(
-        app.invoke("unlock", json!({ "password": "the wrong password" })),
-        Err(json!("Wrong password"))
-    );
-
-    assert_ne!(server.seed_for(EMAIL), local_seed(&path));
 }
 
 #[test]
@@ -300,24 +167,4 @@ fn refuses_account_commands_with_missing_arguments() {
             "{command}: {message}"
         );
     }
-}
-
-#[test]
-fn keeps_the_session_the_server_gave_when_signing_up() {
-    let server = TestServer::start();
-    let (_directory, path) = database();
-    sign_up(&TestApp::with_server(store(&path), &server.url)).unwrap();
-    let mut vault = randomtask_vault::Vault::new(store(&path));
-    vault.unlock(PASSWORD).unwrap();
-
-    let session = vault.session().unwrap().unwrap();
-
-    const DAY_MS: i64 = 24 * 60 * 60 * 1000;
-    assert_eq!(
-        session.refresh_expiration - session.access_expiration,
-        (365 - 60) * DAY_MS
-    );
-    assert!(session.access_token.starts_with("1:"));
-    assert!(session.refresh_token.starts_with("1:"));
-    assert_ne!(session.access_token, session.refresh_token);
 }

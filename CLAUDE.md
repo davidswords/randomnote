@@ -30,6 +30,7 @@ A minimal, client-side encrypted, open source todo app built with TypeScript and
   - `crates/client/store`: SQLite storage (rusqlite, bundled SQLite).
   - `crates/client/crypto`: encryption following the Standard Notes 004 protocol (Argon2id key derivation, XChaCha20-Poly1305 record encryption, and the items-key hierarchy). Test vectors come from independent reference implementations, never from this crate.
   - `crates/client/api`: the client for the server at api.randomtask.ch. It registers and signs in as the Standard Notes client does, sending only the server password derived from the user's password.
+  - `crates/client/app`: what the apps do with the account and its tasks, shared by desktop and web: the vault, plus registering with the server when one is set.
   - `crates/client/vault`: the account and its encrypted tasks. It derives keys from the password with `crypto`, stores only ciphertext with `store`, and holds keys only in memory while unlocked.
 - `crates/server`: the randomtask server at api.randomtask.ch (axum, SQLite). It registers accounts, signs them in, refreshes their sessions and signs them out, at the paths and in the formats the Standard Notes client uses. It never sees passwords or keys, only the server password, which it stores as a bcrypt hash.
 
@@ -49,7 +50,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 
 ## CI and releases
 
-- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for each crate under `crates/client`, `crates/server` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `server-image` job starts the server with Docker Compose and checks it answers. Its `cross-platform` job runs the tests of `crypto`, `store` and `vault` on Windows and macOS, and compiles them for iOS, Android and the browser (WebAssembly, with `api` too), so platform-specific breakage is caught on every pull request.
+- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for each crate under `crates/client`, `crates/server` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `server-image` job starts the server with Docker Compose and checks it answers. Its `cross-platform` job runs the tests of `crypto`, `store` and `vault` on Windows and macOS, and compiles them for iOS, Android and the browser (WebAssembly, with `api` and `app` too), so platform-specific breakage is caught on every pull request.
 - `.github/workflows/release.yml` builds the Apple Silicon `.dmg`. On a `v*` tag it publishes a GitHub release. The tag must match the version in `apps/desktop/package.json`.
 
 ## Releasing

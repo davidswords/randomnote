@@ -16,6 +16,7 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 randomtask-api = { version = "0.1.0", path = "../../../crates/client/api" }
+randomtask-app = { version = "0.1.0", path = "../../../crates/client/app" }
 randomtask-store = { version = "0.1.0", path = "../../../crates/client/store" }
 randomtask-vault = { version = "0.1.0", path = "../../../crates/client/vault" }
 tauri = { version = "2", features = [] }

@@ -1,0 +1,25 @@
+[package]
+name = "randomtask-app"
+version = "0.1.0"
+edition = "2024"
+description = "What the randomtask apps do with the account and its tasks, shared by desktop and web"
+license = "GPL-3.0-only"
+
+[dependencies]
+randomtask-api = { version = "0.1.0", path = "../api" }
+randomtask-store = { version = "0.1.0", path = "../store" }
+randomtask-vault = { version = "0.1.0", path = "../vault" }
+
+[dev-dependencies]
+axum = "0.8"
+randomtask-server = { version = "0.1.0", path = "../../server" }
+reqwest = { version = "0.13", features = ["json"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde_json = "1"
+tempfile = "3"
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread"] }
+
+# Argon2 and the test server's bcrypt are deliberately slow; optimise
+# dependencies even in test builds.
+[profile.dev.package."*"]
+opt-level = 3
