@@ -1,10 +1,10 @@
 import type { Task } from "@randomtask/core";
-import type { Invoke } from "./tauri-task-repository";
+import type { Invoke } from "./command-task-repository";
 
 type Call = { command: string; args?: Record<string, unknown> };
 
 /**
- * Stands in for the Rust task commands behind Tauri's invoke: same command
+ * Stands in for the Rust task commands behind invoke: same command
  * names and arguments, data copied through JSON as IPC does, and null for a
  * missing task, as Rust's None is serialized.
  */

@@ -1,12 +1,12 @@
 import { InMemoryAccounts } from "@randomtask/core";
-import type { Invoke } from "./tauri-task-repository";
+import type { Invoke } from "./command-task-repository";
 
 type Call = { command: string; args?: Record<string, unknown> };
 
 /**
- * Stands in for the Rust account commands behind Tauri's invoke: same
+ * Stands in for the Rust account commands behind invoke: same
  * command names and arguments, and refusals as plain message strings, as
- * Tauri rejects with a command's Err value.
+ * Tauri and the worker reject with a command's Err value.
  */
 export function fakeAccountCommands(): { invoke: Invoke; calls: Call[] } {
   const accounts = new InMemoryAccounts();

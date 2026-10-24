@@ -6,3 +6,6 @@ export { showAccountScreen, showSignUp } from "./account-view";
 export { showApp } from "./app-shell";
 export type { AppServices } from "./app-shell";
 export { showTaskList } from "./task-list-view";
+export { CommandAccounts } from "./commands/command-accounts";
+export { CommandTaskRepository } from "./commands/command-task-repository";
+export type { Invoke } from "./commands/command-task-repository";
