@@ -279,14 +279,15 @@ jobs:
       - name: Build the web app against the test server
         run: npm run build:e2e -w @randomtask/web
 
-      # The runner already has a browser's system libraries, so this skips
-      # --with-deps and the apt mirror, which has hung CI before.
-      - name: Install Chromium for Playwright
-        timeout-minutes: 5
-        run: npx playwright-core install chromium
-
-      - name: Run end-to-end tests in Chromium
-        run: npm run test:e2e -w @randomtask/web
+      # The runner comes with Google Chrome, so Playwright drives that rather
+      # than downloading its own Chromium, which has hung here after downloading.
+      - name: Run end-to-end tests in Chrome
+        timeout-minutes: 10
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: |
+          google-chrome --version
+          npm run test:e2e -w @randomtask/web
 
   server-image:
     runs-on: ubuntu-latest

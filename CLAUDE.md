@@ -54,7 +54,7 @@ Run these from the repository root. Node's version is in `.nvmrc`.
 
 ## CI and releases
 
-- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for each crate under `crates/client`, `crates/server` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `web` job lints the WebAssembly crate, builds the web app and runs its end-to-end tests in Chromium. Its `server-image` job starts the server with Docker Compose and checks it answers. Its `cross-platform` job runs the tests of `crypto`, `store` and `vault` on Windows and macOS, and compiles them for iOS, Android and the browser (WebAssembly, with `api` and `app` too), so platform-specific breakage is caught on every pull request.
+- `.github/workflows/ci.yml` runs typecheck and tests, plus formatting, clippy and tests for each crate under `crates/client`, `crates/server` and `apps/desktop/src-tauri`, on pull requests and on pushes to `main`. Its `e2e` job builds the app and runs the end-to-end tests on Linux. Its `web` job lints the WebAssembly crate, builds the web app and runs its end-to-end tests in the runner's Google Chrome. Its `server-image` job starts the server with Docker Compose and checks it answers. Its `cross-platform` job runs the tests of `crypto`, `store` and `vault` on Windows and macOS, and compiles them for iOS, Android and the browser (WebAssembly, with `api` and `app` too), so platform-specific breakage is caught on every pull request.
 - `.github/workflows/release.yml` builds the Apple Silicon `.dmg`. On a `v*` tag it publishes a GitHub release. The tag must match the version in `apps/desktop/package.json`.
 
 ## Releasing
