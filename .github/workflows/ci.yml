@@ -325,6 +325,57 @@ jobs:
         if: always()
         run: docker compose down --volumes
 
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RANDOMTASK_TAG: ci
+      RANDOMTASK_WEB_ADDRESS: http://randomtask.localhost
+      RANDOMTASK_WWW_ADDRESS: http://www.randomtask.localhost
+      RANDOMTASK_API_ADDRESS: http://api.randomtask.localhost
+      RANDOMTASK_ALLOWED_ORIGINS: http://randomtask.localhost
+    defaults:
+      run:
+        working-directory: deploy
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The same images the Images workflow publishes, served over plain HTTP
+      # at .localhost addresses, since CI can't get certificates for the domain.
+      - name: Build and start randomtask.ch and api.randomtask.ch
+        run: docker compose up --build --detach --wait
+
+      - name: Check the web app is served
+        run: |
+          for path in / /any/path; do
+            page=$(curl --silent --fail --header 'Host: randomtask.localhost' "http://127.0.0.1$path")
+            grep -q '<title>randomtask</title>' <<<"$page"
+          done
+          wasm=$(docker compose exec -T web sh -c 'cd /srv/assets && ls *.wasm')
+          type=$(curl --silent --fail --output /dev/null --write-out '%{content_type}' \
+              --header 'Host: randomtask.localhost' "http://127.0.0.1/assets/$wasm")
+          echo "$wasm is served as $type"
+          [ "$type" = application/wasm ]
+          docker compose exec -T web grep -rlq 'https://api.randomtask.ch' /srv/assets
+
+      - name: Check the API answers the web app
+        run: |
+          headers=$(curl --silent --fail --dump-header - --output /dev/null --request POST \
+              --header 'Host: api.randomtask.localhost' --header 'Origin: http://randomtask.localhost' \
+              --header 'content-type: application/json' \
+              --data '{"email": "ci@example.com", "code_challenge": "test"}' \
+              http://127.0.0.1/v2/login-params)
+          echo "$headers"
+          grep -qi '^access-control-allow-origin: http://randomtask.localhost' <<<"$headers"
+
+      - name: Show the logs and stop
+        if: always()
+        run: |
+          docker compose logs
+          docker compose down --volumes
+
   cross-platform:
     name: cross-platform (${{ matrix.name }})
     runs-on: ${{ matrix.os }}

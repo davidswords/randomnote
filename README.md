@@ -111,6 +111,10 @@ npm test
 
 Each Rust crate under [`crates`](crates) and [`apps/desktop/src-tauri`](apps/desktop/src-tauri) has its own tests: run `cargo test` in its directory. The web app's end-to-end tests run in Chromium against the real server: build the server (`cargo build` in `crates/server`), then `npm run build:e2e -w @randomtask/web` and `npm run test:e2e -w @randomtask/web`. [CLAUDE.md](CLAUDE.md) lists every command.
 
+## Hosting
+
+randomtask.ch and api.randomtask.ch run on one server with Docker Compose. [deploy/README.md](deploy/README.md) explains how to set it up and update it.
+
 ## Licence
 
 [GPL-3.0-only](LICENSE)

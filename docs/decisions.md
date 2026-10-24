@@ -91,7 +91,8 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - **Accounts made on the device in 0.3 and 0.4 are registered with the server when next unlocked,** with the same email and keys, so nothing changes for the user.
 - **The app's server client is built and tested before hosting is chosen,** against the real server code, but stays out of releases until the server is live.
 - **The server sets a minimum app version.** An app older than that shows "Please update randomtask" and stops syncing until it's updated. The minimum is raised whenever a release changes the task format, so an older app can never sync away fields it doesn't know about.
-- **The domain is randomtask.ch.** Where the server is hosted is decided before sync, the first stage that needs it live.
+- **The domain is randomtask.ch.**
+- **randomtask.ch and api.randomtask.ch are hosted on an Infomaniak VPS in Switzerland,** matching the Swiss domain. One Docker Compose setup runs the server and Caddy, which serves the web app and gets HTTPS certificates. CI publishes the images; the VPS runs the latest release. See [deploy/README.md](../deploy/README.md).
 - **Encryption at rest:** once an email and password are added, records are always stored encrypted on the device and decrypted only in memory. Before that, tasks are stored unencrypted, as in Standard Notes, and the app says so. The key is never stored unprotected; staying signed in through the operating system's keychain is opt-in.
 - **An optional recovery key** can be created in the app at any time; it is never forced. Without one, a forgotten password means the data is lost, as in Standard Notes.
 - **An account is an email and a password,** never a username, so we can always reach the user. The email is stored trimmed and in lower case, because the keys are derived from it.
@@ -118,6 +119,6 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Where can archived and expired tasks be seen, and can they be restored?
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
-- The server: where it's hosted, and whether emails are verified.
+- The server: whether emails are verified.
 - Pricing details: the price (around $3 a month or $30 a year was suggested), the length of the free trial, and which merchant of record.
 - Whether the repository stays public.

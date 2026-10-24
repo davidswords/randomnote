@@ -1,0 +1,7 @@
+**/node_modules
+**/target
+**/dist
+**/coverage
+apps/web/src/wasm
+apps/desktop/src-tauri
+.git
