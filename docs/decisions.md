@@ -16,6 +16,8 @@ Product and technical decisions for randomtask. Add to this file when a decision
 
 - **Free, with no limits:** the app, local use and a free account with encryption.
 - **One paid plan, Sync:** sync across devices and the web app, plus email backups once they exist. Billed monthly or yearly, yearly by default, with a free trial of sync. No lifetime plans, because the server's costs never stop.
+- **Sync costs $4 a month or $36 a year.** The payment provider's fee (5% + $0.50 a payment) takes about 17% of a monthly payment but only about 6% of a yearly one, so yearly stays the default.
+- **Hosting costs about CHF 6 a month,** almost all of it fixed: an Infomaniak VPS Lite with 2 vCPUs, 2 GB and 40 GB (CHF 5.40 a month on a yearly plan) and the domain. Object storage for sync is about CHF 0.011 per GB a month, and a user's encrypted tasks take megabytes, so a handful of subscribers covers it.
 - **Self-hosting the open-source server is free.**
 - **Payments go through a merchant of record** (such as Paddle or Lemon Squeezy), which handles VAT and sales tax worldwide. Cancelling stops sync but leaves the data on every device.
 - **The window shows the app's name and version** (for example "randomtask 0.2.1") at the bottom, on every screen.
@@ -120,5 +122,5 @@ Product and technical decisions for randomtask. Add to this file when a decision
 - Encryption, accounts, sync and backups: see the open questions in [design/encryption-and-accounts.md](design/encryption-and-accounts.md).
 - Sync conflicts: how conflicting changes to the same record from two devices are merged.
 - The server: whether emails are verified.
-- Pricing details: the price (around $3 a month or $30 a year was suggested), the length of the free trial, and which merchant of record.
+- Pricing details: the length of the free trial, and which merchant of record.
 - Whether the repository stays public.

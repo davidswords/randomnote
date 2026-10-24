@@ -11,7 +11,7 @@ The [Images workflow](../.github/workflows/images.yml) builds both images and pu
 
 1. **Make the images public, once.** Under the profile's *Packages*, open `randomtask-server` and `randomtask-web`, and in *Package settings* change the visibility to public. (Otherwise the VPS has to `docker login ghcr.io` with a token that can read packages.)
 
-2. **Order the VPS.** In the Infomaniak Manager, order a VPS (VPS Lite is enough to start) with Ubuntu 24.04 or Debian 12, and add your SSH key. If the VPS has a firewall in the Manager, allow TCP 22, 80 and 443, and UDP 443.
+2. **Order the VPS.** In the Infomaniak Manager, order a VPS Lite with 2 vCPUs, 2 GB and 40 GB (CHF 5.40 a month on a yearly plan) with Ubuntu 24.04 or Debian 12, and add your SSH key. If the VPS has a firewall in the Manager, allow TCP 22, 80 and 443, and UDP 443.
 
 3. **Point the domain at it.** In the DNS zone of randomtask.ch, add `A` records for `randomtask.ch`, `www.randomtask.ch` and `api.randomtask.ch` with the VPS's IPv4 address, and `AAAA` records with its IPv6 address if it has one. Caddy can only get certificates once these resolve.
 
