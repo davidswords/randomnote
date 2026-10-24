@@ -6,7 +6,8 @@
     "lib": ["ES2022", "DOM", "WebWorker"],
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "e2e", "vite.config.ts", "vitest.config.ts", "vitest.e2e.config.ts"]
+  "include": ["src", "scripts", "e2e", "vite.config.ts", "vitest.config.ts", "vitest.e2e.config.ts"]
 }

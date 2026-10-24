@@ -26,29 +26,68 @@ Linux, Windows and Intel Mac builds aren't published yet. You can build randomta
 
 ## Run it from source
 
-After cloning the repository, you can run the app, the server, or both.
+You can run the desktop app, the web app and the server from a copy of this repository.
 
-### The app
+### 1. Install the tools, once
 
-You need:
+- **Node.js**, at the version in [`.nvmrc`](.nvmrc). With Homebrew: `brew install node`.
+- **Rust, through rustup.** Homebrew's `rust` formula can't add the WebAssembly target the web app needs, so use rustup:
 
-- Node.js, at the version in [`.nvmrc`](.nvmrc).
-- Rust and the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+  ```
+  brew install rustup
+  rustup-init
+  ```
+
+  On other systems, follow [rustup.rs](https://rustup.rs). Then open a new terminal.
+- **Cargo's tools on your `PATH`.** Programs installed with `cargo install` go in `~/.cargo/bin`. If `ls ~/.cargo/bin` lists them but your shell can't find them, add the folder to your `PATH`:
+
+  ```
+  echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+  ```
+
+- **For the desktop app:** the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+- **For the web app:** Rust's WebAssembly target and `wasm-bindgen`, at the version in the lockfile:
+
+  ```
+  rustup target add wasm32-unknown-unknown
+  cargo install wasm-bindgen-cli --version 0.2.129 --locked
+  ```
+
+  `npm run dev:web` checks these first, and says how to install whatever's missing.
+
+### 2. Get the code
 
 ```
+git clone https://github.com/davidswords/randomtask.git
+cd randomtask
 npm ci
-npm run dev
 ```
 
-### The server
+After every `git pull`, run `npm ci` again, so new packages in the repository are installed.
 
-The server for api.randomtask.ch is in [`crates/server`](crates/server). It isn't hosted yet, so released apps keep accounts on the device. You can run it yourself and point the app at it. The easiest way is [Docker](https://docs.docker.com/get-docker/):
+### 3. Run it
+
+| To run | Command | Then |
+|---|---|---|
+| The server | `cd crates/server && cargo run` | It listens on `http://127.0.0.1:8080`. |
+| The web app | `npm run dev:web` | Open <http://localhost:1430>. |
+| The desktop app | `npm run dev` | Its window opens. |
+| The desktop app with the server | `RANDOMTASK_SERVER=http://127.0.0.1:8080 npm run dev` | Its window opens. |
+
+Run the server in its own terminal, and the app in another. The first run of each compiles the Rust, which takes a few minutes; later runs start in seconds.
+
+- **The web app** registers accounts with the server on `127.0.0.1:8080`, so creating a free account needs the server running. It keeps its tasks in the browser's private storage, separate from the desktop app's; to start afresh, clear the site's data for `localhost:1430` in your browser.
+- **The desktop app** keeps accounts on the device unless `RANDOMTASK_SERVER` is set, as releases do until api.randomtask.ch is live. With it set, creating a free account registers it with the server first, and unlocking an account made without a server registers it too. Tasks stay on each device until sync is built.
+
+### The server with Docker
+
+Instead of `cargo run`, you can run the server with [Docker](https://docs.docker.com/get-docker/), or [OrbStack](https://orbstack.dev) on a Mac:
 
 ```
 docker compose up --build
 ```
 
-It listens on `http://127.0.0.1:8080` and keeps its database in a Docker volume. To check it's running, ask it for an account's key parameters:
+It listens on `http://127.0.0.1:8080`, lets the web app's dev server call it, and keeps its database in a Docker volume. Stop it with `docker compose down`; add `-v` to delete its database too. To check the server is running, however you started it:
 
 ```
 curl -X POST http://127.0.0.1:8080/v2/login-params \
@@ -56,41 +95,12 @@ curl -X POST http://127.0.0.1:8080/v2/login-params \
   -d '{"email": "you@example.com", "code_challenge": "test"}'
 ```
 
-Stop it with `docker compose down`. Add `-v` to delete its database too.
+### If something goes wrong
 
-Without Docker, run it with Rust:
-
-```
-cd crates/server
-cargo run
-```
-
-### The app with the server
-
-With the server running, start the app pointed at it:
-
-```
-RANDOMTASK_SERVER=http://127.0.0.1:8080 npm run dev
-```
-
-Creating a free account then registers it with the server first, and fails with a message if the server can't be reached. Unlocking an account made without a server registers it too. Tasks themselves stay on the device until sync is built.
-
-### The web app in your browser
-
-The same app runs in the browser, with its Rust compiled to WebAssembly. Besides Node.js and Rust, it needs the WebAssembly target and `wasm-bindgen`, at the version in the lockfile:
-
-```
-rustup target add wasm32-unknown-unknown
-cargo install wasm-bindgen-cli --version 0.2.129 --locked
-```
-
-With the server running (`docker compose up --build`, or `cargo run` in `crates/server`), start the web app:
-
-```
-npm run dev:web
-```
-
-Then open <http://localhost:1430>. It keeps its data in the browser's private storage, separate from the desktop app's, and registers accounts with the server on `127.0.0.1:8080`. To start afresh, clear the site's data in your browser.
+- **`Missing script: "dev:web"`:** your copy is older than the web app. Run `git pull`, then `npm ci`.
+- **`The following dependencies are imported but could not be resolved: @randomtask/ui`:** run `npm ci`, then start again.
+- **`npm run dev:web` stops with "The web app needs a few tools first":** run the commands it lists.
+- **Creating an account says it can't reach the server:** start the server, as above.
 
 ### The checks CI runs
 
