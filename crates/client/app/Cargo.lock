@@ -1161,6 +1161,7 @@ dependencies = [
  "randomtask-vault",
  "reqwest",
  "rusqlite",
+ "serde",
  "serde_json",
  "tempfile",
  "tokio",
