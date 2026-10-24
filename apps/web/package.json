@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:wasm": "cargo build --release --locked --target wasm32-unknown-unknown --manifest-path ../../crates/client/web/Cargo.toml && wasm-bindgen --target web --out-dir src/wasm ../../crates/client/web/target/wasm32-unknown-unknown/release/randomtask_web.wasm",
+    "build:wasm": "node scripts/check-tools.ts && cargo build --release --locked --target wasm32-unknown-unknown --manifest-path ../../crates/client/web/Cargo.toml && wasm-bindgen --target web --out-dir src/wasm ../../crates/client/web/target/wasm32-unknown-unknown/release/randomtask_web.wasm",
     "dev": "npm run build:wasm && vite",
     "build": "npm run build:wasm && vite build",
     "build:e2e": "npm run build:wasm && VITE_RANDOMTASK_SERVER=http://127.0.0.1:8181 vite build",
